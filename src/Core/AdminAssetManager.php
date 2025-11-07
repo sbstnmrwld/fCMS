@@ -6,14 +6,15 @@ namespace FCMS\Core;
  * Admin-Asset-Manager
  *
  * Verwaltet Assets ausschließlich für den Admin-Bereich.
- * Alle Assets liegen in /admin/assets/ und sind vom Frontend getrennt.
+ * Alle Assets liegen in /public/admin/assets/ und werden direkt vom Webserver ausgeliefert.
  */
 class AdminAssetManager
 {
     private string $basePath;
     private string $baseUrl;
+    private bool $cacheBusting;
 
-    public function __construct(string $adminPath, string $baseUrl = '')
+    public function __construct(string $adminPath, string $baseUrl = '', bool $cacheBusting = true)
     {
         $this->basePath = $adminPath . '/assets';
         // Wenn kein baseUrl angegeben, verwende relative Pfade
@@ -22,6 +23,26 @@ class AdminAssetManager
         } else {
             $this->baseUrl = rtrim($baseUrl, '/') . '/admin/assets';
         }
+        $this->cacheBusting = $cacheBusting;
+    }
+
+    /**
+     * Fügt Cache-Busting-Parameter hinzu
+     */
+    private function addCacheBuster(string $url, string $filePath): string
+    {
+        if (!$this->cacheBusting) {
+            return $url;
+        }
+
+        // Verwende filemtime als Version
+        $fullPath = $this->basePath . '/' . ltrim($filePath, '/');
+        if (file_exists($fullPath)) {
+            $mtime = filemtime($fullPath);
+            return $url . '?v=' . $mtime;
+        }
+
+        return $url;
     }
 
     /**
@@ -29,7 +50,8 @@ class AdminAssetManager
      */
     public function css(string $file): string
     {
-        return $this->baseUrl . '/css/' . ltrim($file, '/');
+        $url = $this->baseUrl . '/css/' . ltrim($file, '/');
+        return $this->addCacheBuster($url, 'css/' . ltrim($file, '/'));
     }
 
     /**
@@ -37,7 +59,8 @@ class AdminAssetManager
      */
     public function js(string $file): string
     {
-        return $this->baseUrl . '/js/' . ltrim($file, '/');
+        $url = $this->baseUrl . '/js/' . ltrim($file, '/');
+        return $this->addCacheBuster($url, 'js/' . ltrim($file, '/'));
     }
 
     /**

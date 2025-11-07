@@ -1,8 +1,8 @@
 # Asset-Struktur in fCMS
 
-## Wichtig: Assets müssen im public/-Verzeichnis liegen!
+## Wichtig: Assets liegen direkt im public/-Verzeichnis!
 
-Da der Webserver nur auf das `public/`-Verzeichnis zugreifen kann, müssen alle Assets dort platziert werden.
+Da der Webserver nur auf das `public/`-Verzeichnis zugreifen kann, liegen alle Assets direkt dort.
 
 ## Verzeichnisstruktur
 
@@ -13,8 +13,11 @@ public/
 │       ├── bootstrap/
 │       │   ├── css/
 │       │   └── js/
+│       ├── bootstrap-icons/
 │       ├── css/
+│       │   └── admin.css
 │       ├── js/
+│       │   └── admin.js
 │       ├── fonts/
 │       └── images/
 └── themes/
@@ -29,24 +32,19 @@ public/
             └── images/
 ```
 
-## Assets wurden kopiert
+## Direkte Bearbeitung
 
-Die Assets wurden automatisch von:
-- `/admin/assets/` → `/public/admin/assets/`
-- `/themes/default/assets/` → `/public/themes/default/assets/`
+Alle Assets werden direkt in `/public/` bearbeitet:
+- Admin-Assets: `/public/admin/assets/`
+- Theme-Assets: `/public/themes/[theme-name]/assets/`
 
-## Für neue Themes
+**Kein Kopieren mehr nötig!** Änderungen sind sofort im Browser sichtbar (nach Hard-Refresh).
 
-Wenn Sie ein neues Theme erstellen:
+## Cache-Busting
 
-1. Erstellen Sie die Theme-Struktur in `/themes/ihr-theme/`
-2. Kopieren Sie die Assets nach `/public/themes/ihr-theme/assets/`
-
-Beispiel:
-```bash
-mkdir -p public/themes/mein-theme/assets
-cp -r themes/mein-theme/assets/* public/themes/mein-theme/assets/
-```
+Das System fügt automatisch Versions-Parameter zu Assets hinzu (z.B. `admin.css?v=1234567890`),
+basierend auf der Datei-Änderungszeit. So wird sichergestellt, dass Browser immer die neueste
+Version laden.
 
 ## Für Entwicklung
 
