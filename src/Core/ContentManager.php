@@ -46,6 +46,7 @@ class ContentManager
                 'main' => $data['nav_main'] ?? false,
                 'footer' => $data['nav_footer'] ?? false,
                 'order' => $data['nav_order'] ?? 0,
+                'label' => $data['nav_label'] ?? '',
             ],
             'meta' => [
                 'description' => $data['meta_description'] ?? '',
@@ -87,6 +88,9 @@ class ContentManager
         }
         if (isset($data['nav_order'])) {
             $page['navigation']['order'] = (int)$data['nav_order'];
+        }
+        if (isset($data['nav_label'])) {
+            $page['navigation']['label'] = $data['nav_label'];
         }
         if (isset($data['meta_description'])) {
             $page['meta']['description'] = $data['meta_description'];

@@ -1,6 +1,6 @@
 <?php
 
-namespace FCMS\Blocks\Types;
+namespace FCMS\Blocks;
 
 use FCMS\Blocks\AbstractBlock;
 
@@ -33,7 +33,9 @@ class QuoteBlock extends AbstractBlock
     public function render(array $attributes, string $content = ''): string
     {
         $attrs = $this->mergeAttributes($attributes);
-        $content = $content ?: $attrs['content'];
+        // Block-Editor Format: data.text und data.author
+        $content = $content ?: ($attrs['text'] ?? $attrs['content'] ?? '');
+        $citation = $attrs['author'] ?? $attrs['citation'] ?? '';
 
         if (empty($content)) {
             return '';
@@ -52,8 +54,8 @@ class QuoteBlock extends AbstractBlock
         $html = '<blockquote class="' . implode(' ', $classes) . '">';
         $html .= '<p>' . $content . '</p>';
 
-        if ($attrs['citation']) {
-            $html .= '<cite>' . $this->escape($attrs['citation']) . '</cite>';
+        if ($citation) {
+            $html .= '<cite>' . $this->escape($citation) . '</cite>';
         }
 
         $html .= '</blockquote>';

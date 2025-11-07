@@ -1,6 +1,6 @@
 <?php
 
-namespace FCMS\Blocks\Types;
+namespace FCMS\Blocks;
 
 use FCMS\Blocks\AbstractBlock;
 
@@ -34,8 +34,9 @@ class HeadingBlock extends AbstractBlock
     public function render(array $attributes, string $content = ''): string
     {
         $attrs = $this->mergeAttributes($attributes);
-        $content = $content ?: $attrs['content'];
-        $level = max(1, min(6, (int)$attrs['level']));
+        // Block-Editor Format: data.text
+        $content = $content ?: ($attrs['text'] ?? $attrs['content'] ?? '');
+        $level = max(1, min(6, (int)($attrs['level'] ?? 2)));
 
         $htmlAttrs = [];
 

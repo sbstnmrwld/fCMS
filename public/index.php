@@ -102,10 +102,14 @@ $app->get('/', function (Request $request, Response $response) {
     if ($page && isset($page['sections'])) {
         foreach ($page['sections'] as &$section) {
             if (isset($section['type'])) {
+                // Block-Editor Format: { type, data }
+                $blockData = $section['data'] ?? [];
+
+                // Rendere Block basierend auf Typ
                 $section['html'] = $blockRegistry->renderBlock(
                     $section['type'],
-                    $section['attributes'] ?? [],
-                    $section['content'] ?? ''
+                    $blockData,
+                    '' // content ist jetzt in data
                 );
             }
         }
@@ -154,10 +158,14 @@ $app->get('/{slug}', function (Request $request, Response $response, array $args
     if (isset($page['sections'])) {
         foreach ($page['sections'] as &$section) {
             if (isset($section['type'])) {
+                // Block-Editor Format: { type, data }
+                $blockData = $section['data'] ?? [];
+
+                // Rendere Block basierend auf Typ
                 $section['html'] = $blockRegistry->renderBlock(
                     $section['type'],
-                    $section['attributes'] ?? [],
-                    $section['content'] ?? ''
+                    $blockData,
+                    '' // content ist jetzt in data
                 );
             }
         }

@@ -8,6 +8,9 @@
     <!-- Bootstrap CSS (aus Admin-Assets) -->
     <link href="<?= $adminAssets->bootstrapCss() ?>" rel="stylesheet">
 
+    <!-- Bootstrap Icons (lokal) -->
+    <link href="<?= $adminAssets->bootstrapIcons() ?>" rel="stylesheet">
+
     <!-- Admin CSS -->
     <link href="<?= $adminAssets->css('admin.css') ?>" rel="stylesheet">
 </head>
@@ -26,30 +29,35 @@
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'dashboard' ? ' active' : '' ?>"
                            href="/admin">
+                            <i class="bi bi-house-door me-1"></i>
                             <?= $lang->t('admin.dashboard') ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'pages' ? ' active' : '' ?>"
                            href="/admin/pages">
+                            <i class="bi bi-file-earmark-text me-1"></i>
                             <?= $lang->t('admin.pages') ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'navigation' ? ' active' : '' ?>"
                            href="/admin/navigation">
+                            <i class="bi bi-list-ul me-1"></i>
                             <?= $lang->t('admin.navigation') ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'media' ? ' active' : '' ?>"
                            href="/admin/media">
+                            <i class="bi bi-images me-1"></i>
                             <?= $lang->t('admin.media') ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'settings' ? ' active' : '' ?>"
                            href="/admin/settings">
+                            <i class="bi bi-gear me-1"></i>
                             <?= $lang->t('admin.settings') ?>
                         </a>
                     </li>
@@ -58,17 +66,20 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
                             <?= htmlspecialchars($username ?? 'Admin') ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" href="/" target="_blank">
+                                    <i class="bi bi-box-arrow-up-right me-2"></i>
                                     Website anzeigen
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="/admin/logout">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
                                     <?= $lang->t('admin.logout') ?>
                                 </a>
                             </li>

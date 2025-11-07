@@ -34,7 +34,7 @@
                             <li class="nav-item">
                                 <a class="nav-link<?= (isset($page) && $page['slug'] === $item['slug']) ? ' active' : '' ?>"
                                    href="/<?= htmlspecialchars($item['slug']) ?>">
-                                    <?= htmlspecialchars($item['title']) ?>
+                                    <?= htmlspecialchars(($item['navigation']['label'] ?? '') ?: $item['title']) ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
@@ -62,7 +62,7 @@
                             <?php foreach ($footerNavigation as $item): ?>
                                 <li class="list-inline-item">
                                     <a href="/<?= htmlspecialchars($item['slug']) ?>" class="text-white">
-                                        <?= htmlspecialchars($item['title']) ?>
+                                        <?= htmlspecialchars(($item['navigation']['label'] ?? '') ?: $item['title']) ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>

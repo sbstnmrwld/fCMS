@@ -1,6 +1,6 @@
 <?php
 
-namespace FCMS\Blocks\Types;
+namespace FCMS\Blocks;
 
 use FCMS\Blocks\AbstractBlock;
 

@@ -35,5 +35,5 @@ composer.phar
 # Environment
 .env
 .env.local
-public/admin/assets/bootstrap/*
-public/themes/default/assets/bootstrap/*
+public/admin/assets/bootstrap*/*
+public/themes/default/assets/bootstrap*/*

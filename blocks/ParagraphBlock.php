@@ -1,6 +1,6 @@
 <?php
 
-namespace FCMS\Blocks\Types;
+namespace FCMS\Blocks;
 
 use FCMS\Blocks\AbstractBlock;
 
@@ -35,7 +35,8 @@ class ParagraphBlock extends AbstractBlock
     public function render(array $attributes, string $content = ''): string
     {
         $attrs = $this->mergeAttributes($attributes);
-        $content = $content ?: $attrs['content'];
+        // Block-Editor Format: data.text
+        $content = $content ?: ($attrs['text'] ?? $attrs['content'] ?? '');
 
         $htmlAttrs = [];
 

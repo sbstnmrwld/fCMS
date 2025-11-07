@@ -1,0 +1,122 @@
+/**
+ * fCMS Block Editor Styles
+ */
+
+.block-editor-toolbar {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.blocks-container {
+    min-height: 200px;
+    padding: 1rem 0;
+}
+
+.blocks-container:empty::before {
+    content: "Klicken Sie oben auf einen Block-Typ, um einen neuen Block hinzuzufügen";
+    display: block;
+    text-align: center;
+    color: #6c757d;
+    padding: 3rem;
+    border: 2px dashed #dee2e6;
+    border-radius: 0.375rem;
+    background: #f8f9fa;
+}
+
+.block-item {
+    transition: box-shadow 0.2s ease;
+}
+
+.block-item:hover {
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.block-item .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.block-type-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.block-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.block-actions .btn-link {
+    padding: 0.25rem 0.5rem;
+    text-decoration: none;
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.block-item .card-body {
+    padding: 1.25rem;
+}
+
+/* Block-spezifische Styles */
+.block-item[data-block-type="paragraph"] .card-header {
+    border-left: 3px solid #0d6efd;
+}
+
+.block-item[data-block-type="heading"] .card-header {
+    border-left: 3px solid #6610f2;
+}
+
+.block-item[data-block-type="image"] .card-header {
+    border-left: 3px solid #fd7e14;
+}
+
+.block-item[data-block-type="quote"] .card-header {
+    border-left: 3px solid #20c997;
+}
+
+.block-item[data-block-type="list"] .card-header {
+    border-left: 3px solid #0dcaf0;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    .block-editor-toolbar .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .block-editor-toolbar .btn {
+        flex: 1 1 auto;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Animationen */
+@keyframes blockAdded {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.block-item {
+    animation: blockAdded 0.3s ease;
+}
+
+/* Image Preview */
+.block-item[data-block-type="image"] img {
+    max-height: 300px;
+    object-fit: contain;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    background: #fff;
+}

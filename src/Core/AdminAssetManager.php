@@ -73,6 +73,14 @@ class AdminAssetManager
     }
 
     /**
+     * Gibt URL zu Bootstrap Icons CSS zurück
+     */
+    public function bootstrapIcons(): string
+    {
+        return $this->baseUrl . '/bootstrap-icons/bootstrap-icons.min.css';
+    }
+
+    /**
      * Gibt URL zu einem beliebigen Asset zurück
      */
     public function asset(string $path): string
