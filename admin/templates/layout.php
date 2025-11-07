@@ -55,6 +55,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'blocks' ? ' active' : '' ?>"
+                           href="/admin/blocks">
+                            <i class="bi bi-boxes me-1"></i>
+                            Blöcke
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'settings' ? ' active' : '' ?>"
                            href="/admin/settings">
                             <i class="bi bi-gear me-1"></i>

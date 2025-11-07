@@ -110,9 +110,9 @@ code, pre, .code-field {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        var(--fcms-hellblau) 50%, 
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--fcms-hellblau) 50%,
         transparent 100%);
     opacity: 0.6;
 }
@@ -157,8 +157,8 @@ code, pre, .code-field {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, 
-        rgba(63, 169, 245, 0.1) 0%, 
+    background: linear-gradient(180deg,
+        rgba(63, 169, 245, 0.1) 0%,
         rgba(63, 169, 245, 0.05) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -851,4 +851,30 @@ i.bi {
     .block-palette-item i {
         font-size: 1.5rem;
     }
+}
+
+/* Block Library Styles */
+.bg-anthrazit {
+    background-color: var(--fcms-anthrazit) !important;
+}
+
+pre code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+pre {
+    margin-bottom: 0;
+}
+
+blockquote {
+    border-left: 4px solid var(--fcms-hellblau);
+    padding-left: 1rem;
+    font-style: italic;
+}
+
+blockquote footer {
+    font-size: 0.875rem;
+    color: #6B7280;
 }

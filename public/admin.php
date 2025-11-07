@@ -1270,6 +1270,253 @@ $app->post('/settings/update', function (Request $request, Response $response) {
     return $response->withHeader('Location', '/admin/settings')->withStatus(302);
 })->add($authMiddleware);
 
+// ============================================================================
+// BLOCK-ÜBERSICHT
+// ============================================================================
+
+// Block-Bibliothek anzeigen
+$app->get('/blocks', function (Request $request, Response $response) {
+    $blockRegistry = $this->get(BlockRegistry::class);
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $blocks = $blockRegistry->getAllBlocks();
+
+    $blocksContent = '
+    <div class="container-fluid mt-4">
+        <div class="page-header">
+            <h1><i class="bi bi-boxes me-2"></i>Block-Bibliothek</h1>
+            <p>Übersicht aller verfügbaren Content-Blöcke mit Live-Beispielen</p>
+        </div>
+
+        <div class="row">';
+
+    // Paragraph Block
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-text-paragraph text-hellblau me-2"></i>
+                            Paragraph (Absatz)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3"><small>Standardtext-Block für Fließtext und Absätze</small></p>
+
+                        <h6 class="fw-bold mb-2">Beispiel:</h6>
+                        <div class="border rounded p-3 bg-light mb-3">
+                            <p class="mb-0">Dies ist ein Beispiel-Absatz. Der Paragraph-Block wird für normalen Fließtext verwendet und unterstützt mehrere Zeilen. Er ist der am häufigsten verwendete Block-Typ.</p>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">Verwendung:</h6>
+                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
+  "type": "paragraph",
+  "data": {
+    "text": "Ihr Text hier..."
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>';
+
+    // Heading Block
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-type-h1 text-hellblau me-2"></i>
+                            Heading (Überschrift)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3"><small>Überschriften in verschiedenen Ebenen (H1-H6)</small></p>
+
+                        <h6 class="fw-bold mb-2">Beispiele:</h6>
+                        <div class="border rounded p-3 bg-light mb-3">
+                            <h1 class="mb-2">Überschrift H1</h1>
+                            <h2 class="mb-2">Überschrift H2</h2>
+                            <h3 class="mb-2">Überschrift H3</h3>
+                            <h4 class="mb-0">Überschrift H4</h4>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">Verwendung:</h6>
+                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
+  "type": "heading",
+  "data": {
+    "text": "Ihre Überschrift",
+    "level": "2"
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>';
+
+    // Quote Block
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-quote text-hellblau me-2"></i>
+                            Quote (Zitat)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3"><small>Hervorgehobene Zitate mit optionaler Quellenangabe</small></p>
+
+                        <h6 class="fw-bold mb-2">Beispiel:</h6>
+                        <div class="border rounded p-3 bg-light mb-3">
+                            <blockquote class="blockquote mb-0">
+                                <p class="mb-2">"Das einzig Wichtige im Leben sind die Spuren von Liebe, die wir hinterlassen, wenn wir gehen."</p>
+                                <footer class="blockquote-footer">Albert Schweitzer</footer>
+                            </blockquote>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">Verwendung:</h6>
+                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
+  "type": "quote",
+  "data": {
+    "text": "Ihr Zitat...",
+    "caption": "Autor (optional)"
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>';
+
+    // List Block
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul text-hellblau me-2"></i>
+                            List (Liste)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3"><small>Aufzählungen und nummerierte Listen</small></p>
+
+                        <h6 class="fw-bold mb-2">Beispiele:</h6>
+                        <div class="border rounded p-3 bg-light mb-3">
+                            <p class="fw-bold mb-2">Ungeordnet:</p>
+                            <ul class="mb-3">
+                                <li>Erstes Element</li>
+                                <li>Zweites Element</li>
+                                <li>Drittes Element</li>
+                            </ul>
+
+                            <p class="fw-bold mb-2">Geordnet:</p>
+                            <ol class="mb-0">
+                                <li>Schritt eins</li>
+                                <li>Schritt zwei</li>
+                                <li>Schritt drei</li>
+                            </ol>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">Verwendung:</h6>
+                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
+  "type": "list",
+  "data": {
+    "style": "unordered",
+    "items": ["Item 1", "Item 2"]
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>';
+
+    // Image Block
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-image text-hellblau me-2"></i>
+                            Image (Bild)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3"><small>Bilder mit optionaler Bildunterschrift und Alt-Text</small></p>
+
+                        <h6 class="fw-bold mb-2">Beispiel:</h6>
+                        <div class="border rounded p-3 bg-light mb-3">
+                            <img src="https://via.placeholder.com/400x200?text=Beispielbild"
+                                 alt="Beispielbild"
+                                 class="img-fluid rounded mb-2">
+                            <p class="text-muted mb-0"><small><em>Bildunterschrift optional</em></small></p>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">Verwendung:</h6>
+                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
+  "type": "image",
+  "data": {
+    "url": "/content/media/bild.jpg",
+    "alt": "Alternativtext",
+    "caption": "Bildunterschrift"
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>';
+
+    // Info Box
+    $blocksContent .= '
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle text-hellblau me-2"></i>
+                            Block-System
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Verfügbare Blöcke: ' . count($blocks) . '</h6>
+
+                        <p class="mb-3">Das Block-System ermöglicht flexible Content-Strukturierung. Jeder Block hat:</p>
+
+                        <ul class="mb-3">
+                            <li><strong>Type:</strong> Block-Typ (paragraph, heading, etc.)</li>
+                            <li><strong>Data:</strong> Block-spezifische Daten</li>
+                            <li><strong>Render:</strong> HTML-Ausgabe-Methode</li>
+                        </ul>
+
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-lightbulb me-2"></i>
+                            <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden.
+                        </div>
+                    </div>
+                </div>
+            </div>';
+
+    $blocksContent .= '
+        </div>
+
+        <div class="mt-4">
+            <a href="/admin" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
+            </a>
+        </div>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $blocksContent,
+        'title' => 'Block-Bibliothek',
+        'activeMenu' => 'blocks',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
 // Benutzer-Profil (Platzhalter)
 $app->get('/profile', function (Request $request, Response $response) {
     $adminAssets = $this->get(AdminAssetManager::class);

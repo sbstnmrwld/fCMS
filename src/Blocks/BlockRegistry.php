@@ -50,6 +50,14 @@ class BlockRegistry
     }
 
     /**
+     * Alias für all() - gibt alle registrierten Blöcke zurück
+     */
+    public function getAllBlocks(): array
+    {
+        return $this->all();
+    }
+
+    /**
      * Gibt alle Block-Metadaten zurück (für Block-Auswahl im Editor)
      */
     public function getAllMetadata(): array

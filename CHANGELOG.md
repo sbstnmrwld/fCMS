@@ -2,43 +2,41 @@
 
 Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
-Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
-und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
+Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
+Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
-## [Unreleased]
+## [202511071410-dev]
 
 ### Hinzugefügt
-- **Navigation Management**: Neue Admin-Seite `/admin/navigation` zur Verwaltung der Hauptnavigation und Footer-Navigation mit Übersicht aller Seiten, deren Reihenfolge und Sichtbarkeit
+- **Block-Bibliothek**: Neue Admin-Seite `/admin/blocks` mit Übersicht aller verfügbaren Content-Blöcke inkl. Live-Beispiele, JSON-Syntax und Verwendungshinweise
+- **Admin-Branding**: Komplettes CSS-Redesign im fCMS-Stil mit Anthrazit (#2D2E32), Hellblau (#3FA9F5) und Hellgrau (#F2F4F5)
+- **Navigation Enhancement**: Gradient-Hintergrund, Glow-Effekte auf Icons und smooth Transitions für bessere UX
+- **Cache-Busting**: Automatische Versionierung von CSS/JS-Assets basierend auf Datei-Änderungszeit (filemtime)
+- **Navigation Management**: Neue Admin-Seite `/admin/navigation` zur Verwaltung der Hauptnavigation und Footer-Navigation
 - **Settings Management**: Neue Admin-Seite `/admin/settings` zur Verwaltung systemweiter Einstellungen
-- **SettingsManager**: Neue Core-Klasse für JSON-basierte Einstellungsverwaltung mit Dot-Notation-Unterstützung (`site.name`), Thread-Safe File-Locking und automatischen Standardwerten
-- **Custom Navigation Labels**: Möglichkeit, individuelle Menü-Bezeichnungen unabhängig vom Seitentitel zu setzen über das neue Feld `nav_label`
+- **SettingsManager**: Neue Core-Klasse für JSON-basierte Einstellungsverwaltung mit Dot-Notation-Unterstützung (`site.name`), Thread-Safe File-Locking
+- **Custom Navigation Labels**: Möglichkeit, individuelle Menü-Bezeichnungen unabhängig vom Seitentitel zu setzen (`nav_label`)
 - **Bootstrap Icons**: Vollständige lokale Integration von Bootstrap Icons v1.11.1 im Admin-Bereich
-- **AdminAssetManager**: Neue Methode `bootstrapIcons()` für lokale Bootstrap Icons Assets
-- **Icon-Verbesserungen**: Icons durchgängig in allen Admin-Bereichen (Navigation, Dashboard-Karten, Tabellen, Formulare, Block-Editor, Login-Seite)
+- **AdminAssetManager**: Cache-Busting-Funktionalität und `bootstrapIcons()` Methode
 
 ### Geändert
-- **Block-Editor Frontend**: Block-Rendering verwendet jetzt `section['data']` statt `section['attributes']`/`section['content']` für korrektes Rendering der Block-Editor-Inhalte
-- **Block-Namespaces**: Alle Block-Klassen nutzen jetzt den Namespace `FCMS\Blocks` (vorher teilweise `FCMS\Blocks\Types`)
-- **Autoloading**: `blocks/` Verzeichnis zu composer.json Autoloading hinzugefügt
-- **Asset-Loading**: Admin-Templates laden Bootstrap Icons nun lokal statt via CDN
+- **Asset-Struktur**: Vereinfacht - `/admin/assets/` entfernt, nur noch `/public/admin/assets/` (keine Duplikate mehr)
+- **System-Fonts**: Verwendung von System-Font-Stack statt externen Google Fonts (datenschutzfreundlich)
+- **Block-Editor Frontend**: Block-Rendering verwendet `section['data']` statt `section['attributes']`/`section['content']`
+- **Block-Namespaces**: Alle Block-Klassen nutzen einheitlich `FCMS\Blocks`
+- **Autoloading**: `blocks/` Verzeichnis zu composer.json hinzugefügt
+- **Button-Styles**: Alle Buttons mit `!important` verstärkt, Icons erben Textfarbe
+- **Config**: Admin-Pfad zeigt jetzt auf `/public/admin` statt `/admin`
 
 ### Behoben
-- **Block-Editor Content**: Seiten zeigten nur Titel, aber keine Block-Editor-Inhalte aufgrund von Datenstruktur-Mismatch
-- **Block-Kompatibilität**: ParagraphBlock, HeadingBlock und QuoteBlock unterstützen jetzt beide Datenformate (`data.text` und `content`) für Abwärtskompatibilität
-- **Navigation Labels**: Theme-Templates verwenden custom `navigation.label` mit Fallback auf Seitentitel
-
-### Settings Management Details
-Die neue Settings-Verwaltung umfasst:
-- **Website-Einstellungen**: Name, Tagline, Sprache, Zeitzone
-- **SEO-Einstellungen**: Meta-Description, Keywords, Robots-Tag
-- **Theme-Verwaltung**: Theme-Auswahl aus verfügbaren Themes
-- **Wartungsmodus**: Toggle mit individueller Wartungsnachricht
-- Speicherung in `content/settings.json` mit automatischer Erstellung
-- CSRF-geschützte POST-Route `/admin/settings/update`
+- **Block-Editor Content**: Seiten zeigten nur Titel, aber keine Block-Editor-Inhalte (Datenstruktur-Mismatch)
+- **Block-Kompatibilität**: ParagraphBlock, HeadingBlock und QuoteBlock unterstützen beide Datenformate
+- **Navigation Labels**: Theme-Templates verwenden `navigation.label` mit Fallback auf Seitentitel
+- **BlockRegistry**: `getAllBlocks()` Methode hinzugefügt (fehlte)
 
 ---
 
-## [0.1.0] - 2025-11-07
+## [202511071200-dev]
 
 ### Hinzugefügt
 
@@ -197,14 +195,14 @@ Initial Release - Keine Breaking Changes
 
 ## Versionierungsschema
 
-fCMS folgt [Semantic Versioning](https://semver.org/):
+fCMS verwendet Timestamp-basierte Versionierung:
 
-- **MAJOR**: Inkompatible API-Änderungen
-- **MINOR**: Neue Funktionen, abwärtskompatibel
-- **PATCH**: Bugfixes, abwärtskompatibel
+- **Format**: `YYYYMMDDhhmm-{dev|stable}`
+- **Beispiel**: `202511071410-dev` = 7. November 2025, 14:10 Uhr, Development-Version
+- **dev**: Entwicklungsversion (aktive Entwicklung)
+- **stable**: Stabile Produktionsversion
 
 ## Links
 
-- [Releases](https://github.com/IhrRepo/fCMS/releases)
-- [Issues](https://github.com/IhrRepo/fCMS/issues)
-- [Discussions](https://github.com/IhrRepo/fCMS/discussions)
+- [Repository](https://github.com/sbstnmrwld/fCMS)
+- [Issues](https://github.com/sbstnmrwld/fCMS/issues)

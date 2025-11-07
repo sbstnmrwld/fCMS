@@ -3,7 +3,7 @@
     "description": "fCMS - Dateibasiertes, DSGVO-konformes Content-Management-System",
     "type": "project",
     "license": "MIT",
-    "version": "0.5.0-dev",
+    "version": "202511071410-dev",
     "require": {
         "php": ">=7.4",
         "slim/slim": "^4.12",
