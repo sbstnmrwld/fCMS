@@ -5,7 +5,11 @@
     RewriteEngine On
     RewriteBase /
 
-    # Admin-Bereich
+    # Admin Assets explizit erlauben (statische Dateien)
+    RewriteCond %{REQUEST_URI} ^/admin/assets/
+    RewriteRule ^ - [L]
+
+    # Admin-Bereich (alle anderen /admin/* Requests)
     RewriteRule ^admin(/.*)?$ admin.php [QSA,L]
 
     # Frontend-Routing (alles außer existierende Dateien)

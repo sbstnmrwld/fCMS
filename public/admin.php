@@ -86,7 +86,20 @@ $container->set(BlockRegistry::class, function ($c) {
 // Slim App erstellen
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+
+// BasePath setzen - .htaccess leitet /admin/* zu admin.php um
+// aber der REQUEST_URI enthält noch /admin/*
 $app->setBasePath('/admin');
+
+// Debug-Middleware (nur mit Debug-Modus)
+if ($config['debug']['enabled']) {
+    $app->add(function (Request $request, $handler) {
+        error_log('REQUEST_URI: ' . $request->getUri()->getPath());
+        error_log('SCRIPT_NAME: ' . ($_SERVER['SCRIPT_NAME'] ?? 'not set'));
+        error_log('REQUEST_METHOD: ' . $request->getMethod());
+        return $handler->handle($request);
+    });
+}
 
 // Session starten für alle Requests
 $app->add(function (Request $request, $handler) {
@@ -199,14 +212,15 @@ $authMiddleware = function (Request $request, $handler) {
     $auth = $this->get(AuthManager::class);
 
     if (!$auth->isAuthenticated()) {
-        return $this->get('response')->withHeader('Location', '/admin/login')->withStatus(302);
+        $response = new \Slim\Psr7\Response();
+        return $response->withHeader('Location', '/admin/login')->withStatus(302);
     }
 
     return $handler->handle($request);
 };
 
-// Dashboard
-$app->get('', function (Request $request, Response $response) {
+// Dashboard (Root-Route im /admin Bereich) - sowohl mit als auch ohne trailing slash
+$dashboardHandler = function (Request $request, Response $response) {
     $contentManager = $this->get(ContentManager::class);
     $adminAssets = $this->get(AdminAssetManager::class);
     $lang = $this->get(LanguageManager::class);
@@ -266,9 +280,197 @@ $app->get('', function (Request $request, Response $response) {
 
     $response->getBody()->write($html);
     return $response;
+};
+
+// Registriere Dashboard für beide Pfade (mit und ohne trailing slash)
+$app->get('', $dashboardHandler)->add($authMiddleware);
+$app->get('/', $dashboardHandler)->add($authMiddleware);
+
+// Pages-Verwaltung (Platzhalter)
+$app->get('/pages', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Seiten</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Seiten',
+        'activeMenu' => 'pages',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
 })->add($authMiddleware);
 
-// Weitere Admin-Routen würden hier folgen (pages, media, settings, etc.)
+// Media-Verwaltung (Platzhalter)
+$app->get('/media', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Medien</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Medien',
+        'activeMenu' => 'media',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
+// Navigation-Verwaltung (Platzhalter)
+$app->get('/navigation', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Navigation</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Navigation',
+        'activeMenu' => 'navigation',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
+// Theme-Einstellungen (Platzhalter)
+$app->get('/themes', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Themes</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Themes',
+        'activeMenu' => 'themes',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
+// System-Einstellungen (Platzhalter)
+$app->get('/settings', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Einstellungen</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Einstellungen',
+        'activeMenu' => 'settings',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
+// Benutzer-Profil (Platzhalter)
+$app->get('/profile', function (Request $request, Response $response) {
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $auth = $this->get(AuthManager::class);
+    $csrf = $this->get(CsrfManager::class);
+
+    $placeholderContent = '<div class="container mt-4">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">🚧 In Entwicklung</h4>
+            <p>Die Sektion <strong>Profil</strong> ist aktuell noch nicht implementiert.</p>
+            <hr>
+            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
+        </div>
+        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
+    </div>';
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $placeholderContent,
+        'title' => 'Profil',
+        'activeMenu' => 'profile',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $this);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
 
 // Error Handler
 $errorMiddleware = $app->addErrorMiddleware(
