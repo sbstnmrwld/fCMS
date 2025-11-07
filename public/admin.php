@@ -141,7 +141,7 @@ function renderAdminTemplate(string $template, array $data, $container): string
         'css' => [],
         'js' => []
     ];
-    
+
     foreach ($moduleManager->getLoadedModules() as $module) {
         $assets = $module->getAdminAssets();
         if (!empty($assets['css'])) {
@@ -1339,11 +1339,11 @@ $app->get('/blocks', function (Request $request, Response $response) {
         $blockName = $metadata['name'] ?? ucfirst($blockType);
         $description = $metadata['description'] ?? 'Keine Beschreibung verfügbar';
         $category = $metadata['category'] ?? 'other';
-        
+
         // Hole den Block für Beispiel-Rendering
         $block = $blockRegistry->get($blockType);
         $exampleHtml = '';
-        
+
         // Versuche ein Beispiel zu rendern
         if ($block) {
             try {
@@ -1379,13 +1379,13 @@ $app->get('/blocks', function (Request $request, Response $response) {
                     default:
                         break;
                 }
-                
+
                 $exampleHtml = $block->render($defaultAttrs, '');
             } catch (\Exception $e) {
                 $exampleHtml = '<div class="alert alert-warning">Beispiel konnte nicht geladen werden</div>';
             }
         }
-        
+
         $blocksContent .= '
             <div class="col-lg-6 mb-4">
                 <div class="card">
@@ -1397,12 +1397,12 @@ $app->get('/blocks', function (Request $request, Response $response) {
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-3"><small>' . htmlspecialchars($description) . '</small></p>
-                        
+
                         <div class="mb-3">
                             <span class="badge bg-secondary">' . htmlspecialchars($blockType) . '</span>
                             <span class="badge bg-info">' . htmlspecialchars($category) . '</span>
                         </div>';
-        
+
         if (!empty($exampleHtml)) {
             $blocksContent .= '
                         <h6 class="fw-bold mb-2">Beispiel:</h6>
@@ -1410,7 +1410,7 @@ $app->get('/blocks', function (Request $request, Response $response) {
                             ' . $exampleHtml . '
                         </div>';
         }
-        
+
         $blocksContent .= '
                     </div>
                 </div>
@@ -1423,10 +1423,10 @@ $app->get('/blocks', function (Request $request, Response $response) {
         <div class="mt-4">
             <div class="alert alert-info">
                 <i class="bi bi-lightbulb me-2"></i>
-                <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden. 
+                <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden.
                 Insgesamt sind <strong>' . count($blocks) . ' Blöcke</strong> verfügbar.
             </div>
-            
+
             <a href="/admin" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
             </a>

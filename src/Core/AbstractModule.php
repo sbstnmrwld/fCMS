@@ -134,7 +134,7 @@ abstract class AbstractModule implements ModuleInterface
     /**
      * Gibt Admin-Assets zurück (CSS/JS die im Admin-Bereich geladen werden sollen)
      * Module können diese Methode überschreiben um eigene Assets zu registrieren
-     * 
+     *
      * @return array ['css' => ['path1', 'path2'], 'js' => ['path1', 'path2']]
      */
     public function getAdminAssets(): array

@@ -1,6 +1,6 @@
 /**
  * Form Block Editor Integration
- * 
+ *
  * Registriert den Editor-Renderer für den Form-Block im Block-Editor
  */
 
@@ -13,7 +13,7 @@ if (!window.blockEditorRenderers) {
 window.blockEditorRenderers['form'] = function(block, editorInstance) {
     const blockId = block.id;
     const formId = block.data.formId || '';
-    
+
     // Lade Formulare asynchron
     setTimeout(() => {
         fetch('/admin/api/forms/available')
@@ -36,7 +36,7 @@ window.blockEditorRenderers['form'] = function(block, editorInstance) {
                 console.error('Fehler beim Laden der Formulare:', error);
             });
     }, 0);
-    
+
     return `
         <div class="mb-3">
             <label class="form-label">Formular auswählen</label>

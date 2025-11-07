@@ -54,7 +54,7 @@ class FormBlock extends AbstractBlock implements BlockInterface
             if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/admin/blocks') !== false) {
                 return '<div class="alert alert-info mb-0">
                     <i class="bi bi-info-circle me-2"></i>
-                    <strong>Formular-Block:</strong> Wählen Sie im Editor ein Formular aus der Formular-Bibliothek aus, 
+                    <strong>Formular-Block:</strong> Wählen Sie im Editor ein Formular aus der Formular-Bibliothek aus,
                     um es auf einer Seite anzuzeigen. Das Formular wird dann mit allen Feldern und Submit-Button gerendert.
                 </div>';
             }

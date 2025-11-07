@@ -51,7 +51,7 @@ class FormBuilderModule extends AbstractModule
 
         // Registriere Routen
         $this->registerRoutes($app, $container);
-        
+
         // Registriere API-Endpunkt für verfügbare Formulare
         $this->registerApiRoutes($app, $container);
     }
@@ -62,12 +62,12 @@ class FormBuilderModule extends AbstractModule
     private function registerApiRoutes(object $app, object $container): void
     {
         $self = $this;
-        
+
         // API-Endpunkt für verfügbare Formulare (für Block-Editor)
         $app->get('/api/forms/available', function (Request $request, Response $response) use ($container, $self) {
             require_once $self->getFilePath('FormBlock.php');
             $forms = \FCMS\Modules\FormBuilder\FormBlock::getAvailableForms();
-            
+
             $response->getBody()->write(json_encode($forms));
             return $response->withHeader('Content-Type', 'application/json');
         });
