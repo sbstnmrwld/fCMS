@@ -1,0 +1,21 @@
+{
+    "site": {
+        "name": "Meine Website",
+        "tagline": "",
+        "language": "de",
+        "timezone": "Europe\/Berlin"
+    },
+    "seo": {
+        "meta_description": "",
+        "meta_keywords": "",
+        "robots": "index, follow"
+    },
+    "theme": {
+        "active": "default"
+    },
+    "maintenance": {
+        "enabled": false,
+        "message": "Die Website befindet sich derzeit im Wartungsmodus."
+    },
+    "updated_at": "2025-11-07 12:48:09"
+}

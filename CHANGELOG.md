@@ -5,7 +5,40 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
-## [1.0.0] - 2025-11-07
+## [Unreleased]
+
+### Hinzugefügt
+- **Navigation Management**: Neue Admin-Seite `/admin/navigation` zur Verwaltung der Hauptnavigation und Footer-Navigation mit Übersicht aller Seiten, deren Reihenfolge und Sichtbarkeit
+- **Settings Management**: Neue Admin-Seite `/admin/settings` zur Verwaltung systemweiter Einstellungen
+- **SettingsManager**: Neue Core-Klasse für JSON-basierte Einstellungsverwaltung mit Dot-Notation-Unterstützung (`site.name`), Thread-Safe File-Locking und automatischen Standardwerten
+- **Custom Navigation Labels**: Möglichkeit, individuelle Menü-Bezeichnungen unabhängig vom Seitentitel zu setzen über das neue Feld `nav_label`
+- **Bootstrap Icons**: Vollständige lokale Integration von Bootstrap Icons v1.11.1 im Admin-Bereich
+- **AdminAssetManager**: Neue Methode `bootstrapIcons()` für lokale Bootstrap Icons Assets
+- **Icon-Verbesserungen**: Icons durchgängig in allen Admin-Bereichen (Navigation, Dashboard-Karten, Tabellen, Formulare, Block-Editor, Login-Seite)
+
+### Geändert
+- **Block-Editor Frontend**: Block-Rendering verwendet jetzt `section['data']` statt `section['attributes']`/`section['content']` für korrektes Rendering der Block-Editor-Inhalte
+- **Block-Namespaces**: Alle Block-Klassen nutzen jetzt den Namespace `FCMS\Blocks` (vorher teilweise `FCMS\Blocks\Types`)
+- **Autoloading**: `blocks/` Verzeichnis zu composer.json Autoloading hinzugefügt
+- **Asset-Loading**: Admin-Templates laden Bootstrap Icons nun lokal statt via CDN
+
+### Behoben
+- **Block-Editor Content**: Seiten zeigten nur Titel, aber keine Block-Editor-Inhalte aufgrund von Datenstruktur-Mismatch
+- **Block-Kompatibilität**: ParagraphBlock, HeadingBlock und QuoteBlock unterstützen jetzt beide Datenformate (`data.text` und `content`) für Abwärtskompatibilität
+- **Navigation Labels**: Theme-Templates verwenden custom `navigation.label` mit Fallback auf Seitentitel
+
+### Settings Management Details
+Die neue Settings-Verwaltung umfasst:
+- **Website-Einstellungen**: Name, Tagline, Sprache, Zeitzone
+- **SEO-Einstellungen**: Meta-Description, Keywords, Robots-Tag
+- **Theme-Verwaltung**: Theme-Auswahl aus verfügbaren Themes
+- **Wartungsmodus**: Toggle mit individueller Wartungsnachricht
+- Speicherung in `content/settings.json` mit automatischer Erstellung
+- CSRF-geschützte POST-Route `/admin/settings/update`
+
+---
+
+## [0.1.0] - 2025-11-07
 
 ### Hinzugefügt
 
