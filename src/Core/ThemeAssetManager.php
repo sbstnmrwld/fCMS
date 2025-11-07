@@ -19,7 +19,12 @@ class ThemeAssetManager
     {
         $this->themesPath = $themesPath;
         $this->activeTheme = $activeTheme;
-        $this->baseUrl = rtrim($baseUrl, '/') . '/themes/' . $activeTheme . '/assets';
+        // Wenn kein baseUrl angegeben, verwende relative Pfade
+        if (empty($baseUrl)) {
+            $this->baseUrl = '/themes/' . $activeTheme . '/assets';
+        } else {
+            $this->baseUrl = rtrim($baseUrl, '/') . '/themes/' . $activeTheme . '/assets';
+        }
     }
 
     /**

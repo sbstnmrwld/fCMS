@@ -60,6 +60,10 @@ class FCMSBuilder
         echo "[3/7] Kopiere Dateien...\n";
         $this->copyFiles();
 
+        // 3.5. Assets ins public-Verzeichnis kopieren
+        echo "[3.5/7] Kopiere Assets ins public-Verzeichnis...\n";
+        $this->copyAssetsToPublic();
+
         // 4. Vendor-Verzeichnis optimieren
         echo "[4/7] Optimiere Vendor-Verzeichnis...\n";
         $this->optimizeVendor();
@@ -130,6 +134,60 @@ class FCMSBuilder
             }
 
             $targetPath = $this->tempDir . '/' . $relativePath;
+
+            if ($item->isDir()) {
+                if (!is_dir($targetPath)) {
+                    mkdir($targetPath, 0755, true);
+                }
+            } else {
+                copy($item->getPathname(), $targetPath);
+            }
+        }
+    }
+
+    private function copyAssetsToPublic(): void
+    {
+        // Kopiere Admin-Assets
+        $adminAssetsSource = $this->tempDir . '/admin/assets';
+        $adminAssetsTarget = $this->tempDir . '/public/admin/assets';
+
+        if (is_dir($adminAssetsSource)) {
+            $this->copyDirectory($adminAssetsSource, $adminAssetsTarget);
+        }
+
+        // Kopiere Theme-Assets für alle Themes
+        $themesDir = $this->tempDir . '/themes';
+        if (is_dir($themesDir)) {
+            $themes = scandir($themesDir);
+            foreach ($themes as $theme) {
+                if ($theme === '.' || $theme === '..' || $theme === '.DS_Store') {
+                    continue;
+                }
+
+                $themeAssetsSource = $themesDir . '/' . $theme . '/assets';
+                $themeAssetsTarget = $this->tempDir . '/public/themes/' . $theme . '/assets';
+
+                if (is_dir($themeAssetsSource)) {
+                    $this->copyDirectory($themeAssetsSource, $themeAssetsTarget);
+                }
+            }
+        }
+    }
+
+    private function copyDirectory(string $source, string $target): void
+    {
+        if (!is_dir($target)) {
+            mkdir($target, 0755, true);
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $relativePath = substr($item->getPathname(), strlen($source) + 1);
+            $targetPath = $target . '/' . $relativePath;
 
             if ($item->isDir()) {
                 if (!is_dir($targetPath)) {

@@ -1,0 +1,77 @@
+/* fCMS Default Theme - Benutzerdefinierte Styles */
+
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --text-color: #333;
+    --background-color: #fff;
+}
+
+body {
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Page Content */
+.page-content {
+    line-height: 1.8;
+}
+
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.page-content p {
+    margin-bottom: 1.5rem;
+}
+
+.page-content img {
+    height: auto;
+}
+
+/* Block-Styles */
+.wp-block-image {
+    margin: 2rem 0;
+}
+
+.wp-block-image.alignleft {
+    float: left;
+    margin-right: 2rem;
+}
+
+.wp-block-image.alignright {
+    float: right;
+    margin-left: 2rem;
+}
+
+.wp-block-image.aligncenter {
+    text-align: center;
+}
+
+.wp-element-caption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+}
+
+/* Footer */
+footer a {
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

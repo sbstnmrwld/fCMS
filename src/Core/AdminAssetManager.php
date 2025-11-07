@@ -16,7 +16,12 @@ class AdminAssetManager
     public function __construct(string $adminPath, string $baseUrl = '')
     {
         $this->basePath = $adminPath . '/assets';
-        $this->baseUrl = rtrim($baseUrl, '/') . '/admin/assets';
+        // Wenn kein baseUrl angegeben, verwende relative Pfade
+        if (empty($baseUrl)) {
+            $this->baseUrl = '/admin/assets';
+        } else {
+            $this->baseUrl = rtrim($baseUrl, '/') . '/admin/assets';
+        }
     }
 
     /**
