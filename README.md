@@ -1,8 +1,10 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/img/logo-hell.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/img/logo-dunkel.svg">
-  <img alt="fCMS Logo" src="docs/img/logo-dunkel.svg" width="200">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/img/logo-hell.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/img/logo-dunkel.svg">
+    <img alt="fCMS Logo" src="docs/img/logo-dunkel.svg" width="200">
+  </picture>
+</p>
 
 # fCMS - Dateibasiertes Content-Management-System
 
@@ -66,117 +68,62 @@ Ihr Webspace muss folgende Anforderungen erfüllen:
 - **PHP**: Version 7.4 oder höher
 - **Webserver**: Apache (mit mod_rewrite) oder Nginx
 - **Speicherplatz**: Mindestens 50 MB
+- **Schreibrechte**: Für Verzeichnisse `content/`, `logs/`
 
-- 🎨 [Theme-Entwicklung](docs/theme-development.md)- **Schreibrechte**: Für Verzeichnisse `content/`, `logs/`
+**Keine Datenbank erforderlich!**
 
-- 🧩 [Block-Entwicklung](docs/block-development.md)
-
-- 🔌 [Modul-Entwicklung](docs/module-development.md)**Keine Datenbank erforderlich!**
-
-- 🏛️ [Architektur-Übersicht](docs/architecture.md)
-
-- 📦 [Release-Build erstellen](docs/build-release.md)### Installation
-
-- 💾 [Asset-Management](docs/asset-management.md)
+### Installation
 
 #### Schritt 1: Download
 
-## 🔌 Module
-
 Laden Sie die neueste Version von fCMS herunter:
+- `fCMS-v1.0.0.zip` (Produktionsversion)
 
-fCMS unterstützt ein vollständiges Modul-System:- `fCMS-v1.0.0.zip` (Produktionsversion)
-
-
-
-- **FormBuilder** - Dynamische Formulare erstellen und verwalten#### Schritt 2: Entpacken
-
-- Weitere Module können einfach entwickelt und hinzugefügt werden
+#### Schritt 2: Entpacken
 
 Entpacken Sie die ZIP-Datei auf Ihrem Computer.
 
-📖 **Mehr erfahren**: [Modul-Entwicklung](docs/module-development.md)
-
 #### Schritt 3: Konfiguration anpassen
-
-## 🎨 Themes
 
 1. Öffnen Sie die Datei `config/config.php`
 
-fCMS verwendet ein flexibles Theme-System:2. Passen Sie folgende Einstellungen an:
+2. Passen Sie folgende Einstellungen an:
 
-
-
-- Jedes Theme ist vollständig unabhängig```php
-
-- Eigene Assets (CSS, JS, Bootstrap)'site' => [
-
-- Twig-Templates oder natives PHP    'name' => 'Ihr Vereinsname',  // Name Ihrer Website
-
-- Einfach zu erstellen und anzupassen    'url' => 'https://ihre-domain.de',  // Ihre URL
-
+```php
+'site' => [
+    'name' => 'Ihr Vereinsname',  // Name Ihrer Website
+    'url' => 'https://ihre-domain.de',  // Ihre URL
 ],
-
-📖 **Mehr erfahren**: [Theme-Entwicklung](docs/theme-development.md)```
-
-
-
-## 🧩 Block-System3. **WICHTIG**: Ändern Sie das Admin-Passwort:
-
-
-
-Inhalte werden mit einem modernen Block-Editor erstellt:```php
-
-'admin' => [
-
-- **Standard-Blöcke**: Absatz, Überschrift, Bild, Liste, Zitat, Button    'username' => 'admin',
-
-- **Modul-Blöcke**: Formulare, und mehr    'password' => '$2y$10$...',  // Hier Ihren Hash einfügen
-
-- **Custom-Blöcke**: Eigene Blöcke einfach entwickeln],
-
 ```
 
-📖 **Mehr erfahren**: [Block-Entwicklung](docs/block-development.md)
+3. **WICHTIG**: Ändern Sie das Admin-Passwort:
+
+```php
+'admin' => [
+    'username' => 'admin',
+    'password' => '$2y$10$...',  // Hier Ihren Hash einfügen
+],
+```
 
 Um einen Passwort-Hash zu generieren:
-
-## 📄 Lizenz- Nach dem Upload: Rufen Sie `https://ihre-domain.de/generate-password.php` auf
-
-- Oder verwenden Sie Online-Tool für PHP password_hash
-
-MIT License - Siehe [LICENSE](LICENSE) für Details
+- Nach dem Upload: Rufen Sie `https://ihre-domain.de/generate-password.php` auf
+- Oder verwenden Sie ein Online-Tool für PHP password_hash
 
 #### Schritt 4: Hochladen
 
-## 🙏 Danksagungen
-
 Laden Sie **alle Dateien** per FTP/SFTP auf Ihren Webserver:
+- Zielverzeichnis: `public_html/` oder `httpdocs/` (je nach Provider)
 
-fCMS verwendet folgende Open-Source-Projekte:- Zielverzeichnis: `public_html/` oder `httpdocs/` (je nach Provider)
+#### Schritt 5: Berechtigungen setzen
 
+Stellen Sie sicher, dass folgende Verzeichnisse beschreibbar sind (chmod 755 oder 775):
 
-
-- [Slim Framework](https://www.slimframework.com/)#### Schritt 5: Berechtigungen setzen
-
-- [Bootstrap](https://getbootstrap.com/)
-
-- [Symfony Components](https://symfony.com/components)Stellen Sie sicher, dass folgende Verzeichnisse beschreibbar sind (chmod 755 oder 775):
-
-- [PHP-DI](https://php-di.org/)
-
-```
-
----content/
-
+```bash
+content/
 content/pages/
-
-**Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**content/media/
-
+content/media/
 logs/
-
-Version 202511072230-dev | [Changelog](CHANGELOG.md)```
-
+```
 
 #### Schritt 6: Fertig!
 
@@ -255,49 +202,89 @@ Verwalten Sie Ihre Bilder und Dateien:
 - Theme auswählen
 - Zeitzone
 
+## � Module
+
+fCMS unterstützt ein vollständiges Modul-System:
+
+- **FormBuilder** - Dynamische Formulare erstellen und verwalten
+- Weitere Module können einfach entwickelt und hinzugefügt werden
+
+📖 **Mehr erfahren**: [Modul-Entwicklung](docs/module-development.md)
+
+## 🎨 Themes
+
+fCMS verwendet ein flexibles Theme-System:
+
+- Jedes Theme ist vollständig unabhängig
+- Eigene Assets (CSS, JS)
+- Natives PHP oder Twig-Templates
+- Einfach zu erstellen und anzupassen
+
+📖 **Mehr erfahren**: [Theme-Entwicklung](docs/theme-development.md)
+
+## 🧩 Block-System
+
+Inhalte werden mit einem modernen Block-Editor erstellt:
+
+- **Standard-Blöcke**: Absatz, Überschrift, Bild, Liste, Zitat, Button
+- **Modul-Blöcke**: Formulare, und mehr
+- **Custom-Blöcke**: Eigene Blöcke einfach entwickeln
+
+📖 **Mehr erfahren**: [Block-Entwicklung](docs/block-development.md)
+
 ---
 
 ## 💻 Für Entwickler
 
 ### Entwicklungs-Setup
 
-fCMS wird mit modernen PHP-Frameworks und Composer entwickelt, aber als produktionsfertiges ZIP ohne Entwicklungs-Dependencies ausgeliefert.
+**Detaillierte Anleitung**: [Entwicklungs-Setup](docs/development-setup.md)
+
+fCMS wird mit modernen PHP-Frameworks und Composer entwickelt.
 
 #### Voraussetzungen
 
-- PHP 7.4 oder höher
+- **Docker** (empfohlen) oder PHP 7.4+
 - Composer
 - Git (optional)
 
-#### Repository klonen
+#### Quick Start mit Docker
 
 ```bash
+# Repository klonen
 git clone https://github.com/IhrRepo/fCMS.git
 cd fCMS
-```
 
-#### Dependencies installieren
-
-```bash
+# Dependencies installieren
 composer install
+
+# Docker-Container starten
+docker-compose up -d
+
+# Browser öffnen
+open http://localhost:8000
 ```
 
-#### Konfiguration
+#### Ohne Docker
 
 ```bash
+# Repository klonen
+git clone https://github.com/IhrRepo/fCMS.git
+cd fCMS
+
+# Dependencies installieren
+composer install
+
+# Konfiguration
 cp config/config.example.php config/config.php
-# Passen Sie config/config.php an
-```
 
-#### Lokalen Server starten
-
-```bash
+# Server starten
 php -S localhost:8000 -t public/
 ```
 
-Öffnen Sie `http://localhost:8000` im Browser.
-
 ### Architektur-Übersicht
+
+**Detaillierte Dokumentation**: [Architektur](docs/architecture.md)
 
 fCMS basiert auf:
 
@@ -966,4 +953,4 @@ fCMS verwendet folgende Open-Source-Projekte:
 
 **Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**
 
-Version 1.0.0 | [GitHub](https://github.com/IhrRepo/fCMS) | [Website](https://fcms.example.com)
+Version 202511072230-dev | [Changelog](CHANGELOG.md)
