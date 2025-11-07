@@ -61,7 +61,7 @@ git push origin v1.0.0-stable
 # Build verfolgen
 # GitHub → Actions → Workflow-Name
 
-# Release verifizieren  
+# Release verifizieren
 # GitHub → Releases
 ```
 
