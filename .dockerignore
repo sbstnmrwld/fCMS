@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Build
+releases/*
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Development
+router.php
+dev-server.php

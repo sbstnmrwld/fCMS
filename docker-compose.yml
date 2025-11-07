@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: fcms-web
+    ports:
+      - "8000:80"
+    volumes:
+      # Mount das komplette Projekt
+      - .:/var/www/html
+      # Vendor-Verzeichnis separat mounten (bessere Performance)
+      - ./vendor:/var/www/html/vendor
+    environment:
+      - PHP_DISPLAY_ERRORS=1
+      - PHP_ERROR_REPORTING=E_ALL
+    restart: unless-stopped
+    # Optional: Composer Dependencies beim Start installieren
+    # command: >
+    #   sh -c "composer install --no-interaction && apache2-foreground"
