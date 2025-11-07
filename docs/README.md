@@ -169,4 +169,4 @@ Siehe [CONTRIBUTING.md](../CONTRIBUTING.md) für Details.
 
 **Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**
 
-Version 202511072230-dev | [Zurück zur Hauptseite](../README.md)
+Version 202511072246-dev | [Zurück zur Hauptseite](../README.md)

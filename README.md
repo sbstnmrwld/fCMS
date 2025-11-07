@@ -8,7 +8,7 @@
 
 # fCMS - Dateibasiertes Content-Management-System
 
-![Version](https://img.shields.io/badge/version-202511072230--dev-blue.svg)
+![Version](https://img.shields.io/badge/version-202511072246--dev-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -953,4 +953,4 @@ fCMS verwendet folgende Open-Source-Projekte:
 
 **Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**
 
-Version 202511072230-dev | [Changelog](CHANGELOG.md)
+Version 202511072246-dev | [Changelog](CHANGELOG.md)

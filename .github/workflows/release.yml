@@ -1,0 +1,118 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*-stable'  # Nur bei Tags die auf -stable enden (z.B. v1.0.0-stable, v202511072230-stable)
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, zip
+        tools: composer:v2
+    
+    - name: Get Version from Tag
+      id: version
+      run: |
+        # Extrahiert Version aus Tag (z.B. v1.0.0 -> 1.0.0)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+    
+    - name: Install Production Dependencies
+      run: |
+        composer install --no-dev --optimize-autoloader --no-interaction
+    
+    - name: Download Bootstrap
+      run: |
+        # Bootstrap für Admin-Bereich herunterladen
+        wget https://github.com/twbs/bootstrap/releases/download/v5.3.2/bootstrap-5.3.2-dist.zip
+        unzip bootstrap-5.3.2-dist.zip
+        
+        # Bootstrap für Admin
+        mkdir -p public/admin/assets/bootstrap
+        cp -r bootstrap-5.3.2-dist/css public/admin/assets/bootstrap/
+        cp -r bootstrap-5.3.2-dist/js public/admin/assets/bootstrap/
+        
+        # Bootstrap für Default-Theme
+        mkdir -p public/themes/default/assets/bootstrap
+        cp -r bootstrap-5.3.2-dist/css public/themes/default/assets/bootstrap/
+        cp -r bootstrap-5.3.2-dist/js public/themes/default/assets/bootstrap/
+        
+        # Bootstrap Icons für Admin
+        wget https://github.com/twbs/icons/releases/download/v1.11.1/bootstrap-icons-1.11.1.zip
+        unzip bootstrap-icons-1.11.1.zip
+        mkdir -p public/admin/assets/bootstrap-icons
+        cp bootstrap-icons-1.11.1/font/bootstrap-icons.min.css public/admin/assets/bootstrap-icons/
+        cp -r bootstrap-icons-1.11.1/font/fonts public/admin/assets/bootstrap-icons/
+        
+        # Cleanup
+        rm -rf bootstrap-5.3.2-dist bootstrap-5.3.2-dist.zip
+        rm -rf bootstrap-icons-1.11.1 bootstrap-icons-1.11.1.zip
+    
+    - name: Run Build Script
+      run: |
+        php build/build.php ${{ steps.version.outputs.version }}
+    
+    - name: Verify Build
+      run: |
+        if [ ! -f "releases/fCMS-v${{ steps.version.outputs.version }}.zip" ]; then
+          echo "Error: Build failed - ZIP file not found"
+          exit 1
+        fi
+        
+        # Größe prüfen
+        SIZE=$(du -h "releases/fCMS-v${{ steps.version.outputs.version }}.zip" | cut -f1)
+        echo "Build successful: fCMS-v${{ steps.version.outputs.version }}.zip ($SIZE)"
+        
+        # MD5 Checksumme anzeigen
+        if [ -f "releases/fCMS-v${{ steps.version.outputs.version }}.md5" ]; then
+          echo "MD5: $(cat releases/fCMS-v${{ steps.version.outputs.version }}.md5)"
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          releases/fCMS-v${{ steps.version.outputs.version }}.zip
+          releases/fCMS-v${{ steps.version.outputs.version }}.md5
+        body: |
+          ## fCMS Release v${{ steps.version.outputs.version }}
+          
+          ### Installation
+          
+          1. ZIP-Datei herunterladen und entpacken
+          2. `config/config.php` anpassen
+          3. Alle Dateien per FTP hochladen
+          4. Passwort-Hash generieren und in Config eintragen
+          5. Website aufrufen und anmelden
+          
+          ### Checksumme
+          
+          MD5: `${{ steps.version.outputs.version }}.md5`
+          
+          ### Changelog
+          
+          Siehe [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+        draft: false
+        prerelease: false  # Stable Releases sind nie Pre-Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: fCMS-v${{ steps.version.outputs.version }}
+        path: |
+          releases/fCMS-v${{ steps.version.outputs.version }}.zip
+          releases/fCMS-v${{ steps.version.outputs.version }}.md5
+        retention-days: 90

@@ -1,0 +1,117 @@
+name: Manual Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (z.B. 1.0.0 oder 202511072230-dev)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Als Pre-Release markieren?'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, zip
+        tools: composer:v2
+    
+    - name: Install Production Dependencies
+      run: |
+        composer install --no-dev --optimize-autoloader --no-interaction
+    
+    - name: Download Bootstrap
+      run: |
+        # Bootstrap für Admin-Bereich
+        wget https://github.com/twbs/bootstrap/releases/download/v5.3.2/bootstrap-5.3.2-dist.zip
+        unzip bootstrap-5.3.2-dist.zip
+        
+        # Bootstrap für Admin
+        mkdir -p public/admin/assets/bootstrap
+        cp -r bootstrap-5.3.2-dist/css public/admin/assets/bootstrap/
+        cp -r bootstrap-5.3.2-dist/js public/admin/assets/bootstrap/
+        
+        # Bootstrap für Default-Theme
+        mkdir -p public/themes/default/assets/bootstrap
+        cp -r bootstrap-5.3.2-dist/css public/themes/default/assets/bootstrap/
+        cp -r bootstrap-5.3.2-dist/js public/themes/default/assets/bootstrap/
+        
+        # Bootstrap Icons für Admin
+        wget https://github.com/twbs/icons/releases/download/v1.11.1/bootstrap-icons-1.11.1.zip
+        unzip bootstrap-icons-1.11.1.zip
+        mkdir -p public/admin/assets/bootstrap-icons
+        cp bootstrap-icons-1.11.1/font/bootstrap-icons.min.css public/admin/assets/bootstrap-icons/
+        cp -r bootstrap-icons-1.11.1/font/fonts public/admin/assets/bootstrap-icons/
+        
+        # Cleanup
+        rm -rf bootstrap-5.3.2-dist bootstrap-5.3.2-dist.zip
+        rm -rf bootstrap-icons-1.11.1 bootstrap-icons-1.11.1.zip
+    
+    - name: Run Build Script
+      run: |
+        php build/build.php ${{ inputs.version }}
+    
+    - name: Verify Build
+      run: |
+        if [ ! -f "releases/fCMS-v${{ inputs.version }}.zip" ]; then
+          echo "Error: Build failed - ZIP file not found"
+          exit 1
+        fi
+        
+        SIZE=$(du -h "releases/fCMS-v${{ inputs.version }}.zip" | cut -f1)
+        echo "✓ Build successful: fCMS-v${{ inputs.version }}.zip ($SIZE)"
+        
+        if [ -f "releases/fCMS-v${{ inputs.version }}.md5" ]; then
+          echo "✓ MD5: $(cat releases/fCMS-v${{ inputs.version }}.md5)"
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ inputs.version }}
+        name: fCMS v${{ inputs.version }}
+        files: |
+          releases/fCMS-v${{ inputs.version }}.zip
+          releases/fCMS-v${{ inputs.version }}.md5
+        body: |
+          ## fCMS Release v${{ inputs.version }}
+          
+          Manuell erstellter Release-Build.
+          
+          ### Installation
+          
+          1. ZIP-Datei herunterladen und entpacken
+          2. `config/config.php` anpassen
+          3. Alle Dateien per FTP hochladen
+          4. Passwort-Hash generieren und in Config eintragen
+          5. Website aufrufen und anmelden
+          
+          ### Dokumentation
+          
+          - [Installation](https://github.com/${{ github.repository }}/blob/main/docs/installation.md)
+          - [Changelog](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+        draft: false
+        prerelease: ${{ inputs.prerelease }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: fCMS-v${{ inputs.version }}
+        path: |
+          releases/fCMS-v${{ inputs.version }}.zip
+          releases/fCMS-v${{ inputs.version }}.md5
+        retention-days: 90

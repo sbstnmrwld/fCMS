@@ -5,6 +5,28 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
+## [202511072246-dev]
+
+### Hinzugefügt
+- **GitHub Actions CI/CD Pipeline**: Vollautomatisierte Release-Erstellung
+  - `release.yml`: Automatischer Build bei `-stable` Tags
+  - `manual-release.yml`: Manueller Build für Dev/Beta/Alpha Releases
+  - Automatische Bootstrap und Bootstrap Icons Installation
+  - GitHub Release-Erstellung mit ZIP und MD5
+  - Build-Artifacts mit 90 Tage Aufbewahrung
+- **CI/CD Dokumentation**: Vollständige Pipeline-Anleitung
+  - `docs/ci-cd-pipeline.md`: Detaillierte Workflow-Dokumentation
+  - `.github/workflows/README.md`: Workflow-Übersicht
+  - Tag-Konventionen und Best Practices
+
+### Geändert
+- **Release-Workflow**: Nur `-stable` Tags lösen automatische Builds aus
+  - Development, Beta, Alpha via manuellen Workflow
+  - Pre-Release Status manuell steuerbar
+- **README.md Branding**: Logo zentriert für bessere Darstellung
+
+---
+
 ## [202511072230-dev]
 
 ### Hinzugefügt
