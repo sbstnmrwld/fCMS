@@ -5,9 +5,72 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
+## [202511071800-dev]
+
+### Hinzugefügt
+- **Modul-Asset-System**: Automatisches Laden von Modul-Assets im Admin-Bereich
+  - `getAdminAssets()` Methode in `AbstractModule` für CSS/JS-Registrierung
+  - Admin-Template lädt automatisch alle Assets von aktiven Modulen
+  - `renderAdminTemplate()` sammelt Assets von allen Modulen via ModuleManager
+- **Block-Editor Registry-System**: Generischer Mechanismus für Custom-Block-Renderer
+  - `window.blockEditorRenderers` als globales Registry-Object
+  - Core Block-Editor prüft Registry für unbekannte Block-Typen
+  - Module können eigene Block-Renderer registrieren ohne Core-Code zu ändern
+- **FormBuilder Modul v202511071800-dev**: Vollständige Modul-Unabhängigkeit erreicht
+  - `form-block-editor.js` registriert Form-Block-Renderer im Registry
+  - `README-BLOCK-EDITOR.md` dokumentiert Registry-Pattern
+  - API-Endpunkt `/admin/api/forms/available` für dynamisches Laden
+
+### Geändert
+- **Block-Editor Core**: Form-spezifischer Code entfernt
+  - ❌ Entfernt: `case 'form':` und `renderFormBlockEditor()` aus `block-editor.js`
+  - ✅ Hinzugefügt: Generischer `default:` Case mit Registry-Check
+  - Core kennt jetzt nur noch Standard-Blöcke (paragraph, heading, image, quote, list)
+- **FormBlock**: Selbstständiges Beispiel-Rendering
+  - Block erkennt `/admin/blocks` Route und zeigt Info-Box
+  - Keine modulspezifische Beispiel-Logik mehr in `admin.php`
+- **Admin-Template Layout**: Modul-Assets werden automatisch eingebunden
+  - CSS-Assets im `<head>` nach Admin-CSS
+  - JS-Assets vor schließendem `</body>` nach Admin-JS
+
+### Architektur-Verbesserung
+- **Vollständige Modul-Kapselung**: Kein modulspezifischer Code mehr im Core
+  - Vorher: `block-editor.js` enthielt Form-spezifische Logik
+  - Nachher: Core bietet generisches Registry, Module registrieren sich selbst
+- **Saubere Trennung**: Klare Schnittstelle zwischen Core und Modulen
+  - Core: Bietet Registry-Mechanismus und Asset-Loading-System
+  - Module: Registrieren eigene Renderer und definieren eigene Assets
+- **Erweiterbarkeit**: Andere Module können genauso Custom-Block-Renderer registrieren
+
+### Technische Details
+- Registry-Pattern für Block-Renderer über `window.blockEditorRenderers[blockType]`
+- Module definieren Assets via `getAdminAssets()` → `['css' => [...], 'js' => [...]]`
+- Asset-Pfade relativ zu Document-Root (z.B. `/modules/form-builder/assets/js/...`)
+
+---
+
 ## [202511071410-dev]
 
 ### Hinzugefügt
+- **Modul-System**: Vollständiges Plugin-System zur Erweiterung von fCMS
+  - `ModuleInterface`: Definiert Modul-Contract mit boot, activate, deactivate, install, uninstall
+  - `AbstractModule`: Basis-Klasse mit Config-Loading, View-Rendering und Standard-Implementierungen
+  - `ModuleManager`: Modul-Discovery, Aktivierung/Deaktivierung, Booting-System
+  - Modul-Verwaltungs-UI unter `/admin/modules` mit Aktivierungs-/Deaktivierungs-Funktionen
+  - Modul-Menü in Admin-Navigation mit Puzzle-Icon
+  - Aktive Module werden in `/content/active-modules.json` gespeichert
+- **Form-Builder Modul**: Erstes offizielles Modul - dynamischer Formular-Generator
+  - Drag-and-Drop Formular-Editor mit visueller Feldverwaltung
+  - Unterstützte Feldtypen: Text, Email, Textarea, Select, Checkbox, Radio
+  - Formular-Übersicht unter `/admin/forms` mit Erstellungs-/Bearbeitungsfunktionen
+  - Submission-Verwaltung unter `/admin/forms/submissions/{id}`
+  - JSON-basierte Speicherung in `/content/forms/` und `/content/submissions/`
+  - Validierungs-Optionen (required, min/max length, email-Validierung)
+  - **FormBlock**: Content-Block zum Einbetten von Formularen in Seiten
+  - **Frontend-Rendering**: Vollständige Formular-Darstellung mit AJAX-Submission
+  - **E-Mail-Benachrichtigungen**: Automatischer E-Mail-Versand bei Formular-Einsendungen
+  - **Submission-Handler**: POST-Endpoint `/form/submit/{id}` mit Validierung und Speicherung
+  - Custom CSS-Styles für konsistente Formular-Darstellung im fCMS-Design
 - **Block-Bibliothek**: Neue Admin-Seite `/admin/blocks` mit Übersicht aller verfügbaren Content-Blöcke inkl. Live-Beispiele, JSON-Syntax und Verwendungshinweise
 - **Admin-Branding**: Komplettes CSS-Redesign im fCMS-Stil mit Anthrazit (#2D2E32), Hellblau (#3FA9F5) und Hellgrau (#F2F4F5)
 - **Navigation Enhancement**: Gradient-Hintergrund, Glow-Effekte auf Icons und smooth Transitions für bessere UX
@@ -26,7 +89,7 @@ Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 - **Block-Namespaces**: Alle Block-Klassen nutzen einheitlich `FCMS\Blocks`
 - **Autoloading**: `blocks/` Verzeichnis zu composer.json hinzugefügt
 - **Button-Styles**: Alle Buttons mit `!important` verstärkt, Icons erben Textfarbe
-- **Config**: Admin-Pfad zeigt jetzt auf `/public/admin` statt `/admin`
+- **Config**: Admin-Pfad zeigt jetzt auf `/public/admin` statt `/admin`, `modules` Pfad hinzugefügt
 
 ### Behoben
 - **Block-Editor Content**: Seiten zeigten nur Titel, aber keine Block-Editor-Inhalte (Datenstruktur-Mismatch)

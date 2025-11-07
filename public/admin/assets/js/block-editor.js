@@ -8,6 +8,48 @@ class BlockEditor {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.blocks = [];
+        this.blockTypes = {}; // Wird dynamisch geladen
+
+        this.init();
+    }
+
+    init() {
+        this.loadAvailableBlocks().then(() => {
+            this.renderToolbar();
+            this.renderBlocksContainer();
+            this.loadBlocks();
+        });
+    }
+
+    async loadAvailableBlocks() {
+        // Lade verfügbare Blöcke aus hidden input
+        const availableBlocksInput = document.getElementById('available_blocks_data');
+        if (availableBlocksInput && availableBlocksInput.value) {
+            try {
+                const availableBlocks = JSON.parse(availableBlocksInput.value);
+
+                // Konvertiere Block-Metadaten in blockTypes Format
+                Object.entries(availableBlocks).forEach(([type, metadata]) => {
+                    this.blockTypes[type] = {
+                        name: metadata.name || type,
+                        icon: metadata.icon ? `<i class="bi ${metadata.icon}"></i>` : '<i class="bi bi-puzzle"></i>',
+                        category: metadata.category || 'other',
+                        description: metadata.description || '',
+                        defaultData: metadata.defaultAttributes || {}
+                    };
+                });
+            } catch (e) {
+                console.error('Fehler beim Laden der verfügbaren Blöcke:', e);
+                // Fallback: Standard-Blöcke
+                this.setDefaultBlocks();
+            }
+        } else {
+            // Fallback: Standard-Blöcke
+            this.setDefaultBlocks();
+        }
+    }
+
+    setDefaultBlocks() {
         this.blockTypes = {
             'paragraph': {
                 name: 'Absatz',
@@ -35,14 +77,6 @@ class BlockEditor {
                 defaultData: { items: [], ordered: false }
             }
         };
-
-        this.init();
-    }
-
-    init() {
-        this.renderToolbar();
-        this.renderBlocksContainer();
-        this.loadBlocks();
     }
 
     renderToolbar() {
@@ -226,7 +260,11 @@ class BlockEditor {
                 `;
 
             default:
-                return '<p>Unbekannter Block-Typ</p>';
+                // Für unbekannte/Module-Blöcke: Prüfe ob ein Custom-Renderer registriert ist
+                if (window.blockEditorRenderers && window.blockEditorRenderers[block.type]) {
+                    return window.blockEditorRenderers[block.type](block, this);
+                }
+                return '<p class="text-muted">Kein Editor für diesen Block-Typ verfügbar</p>';
         }
     }
 

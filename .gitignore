@@ -6,6 +6,8 @@
 /content/media/*
 !/content/pages/.gitkeep
 !/content/media/.gitkeep
+content/active-modules.json
+content/forms/*
 
 # Config (user specific)
 /config/config.php

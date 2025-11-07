@@ -1,0 +1,25 @@
+{
+  "name": "form-builder",
+  "version": "202511071800-dev",
+  "title": "Formular-Builder",
+  "description": "Erstelle und verwalte dynamische Formulare mit Drag & Drop Editor. Perfekt für Kontaktformulare, Mitgliedsanmeldungen, Umfragen und mehr.",
+  "author": "fCMS Team",
+  "requires": {
+    "fcms": ">=202511071410-dev"
+  },
+  "routes": [
+    "/admin/forms"
+  ],
+  "permissions": [
+    "forms.view",
+    "forms.create",
+    "forms.edit",
+    "forms.delete",
+    "forms.submissions"
+  ],
+  "menu": {
+    "title": "Formulare",
+    "icon": "bi-envelope",
+    "position": 4
+  }
+}

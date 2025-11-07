@@ -79,9 +79,26 @@ $container->set(BlockRegistry::class, function ($c) {
     return $registry;
 });
 
+$container->set(\FCMS\Core\ModuleManager::class, function ($c) {
+    $config = $c->get('config');
+    return new \FCMS\Core\ModuleManager($config['paths']['modules'], $config['paths']['content']);
+});
+
 // Slim App erstellen
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+
+// Module booten (für öffentliche Routen)
+$moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+$moduleManager->bootActiveModules($app, $container);
+
+// Öffentliche Modul-Routen registrieren
+$activeModules = $moduleManager->getActiveModuleInstances($app, $container);
+foreach ($activeModules as $module) {
+    if (method_exists($module, 'registerPublicRoutes')) {
+        $module->registerPublicRoutes($app, $container);
+    }
+}
 
 // Routing
 $app->get('/', function (Request $request, Response $response) {

@@ -89,6 +89,16 @@ $container->set(BlockRegistry::class, function ($c) {
     return $registry;
 });
 
+$container->set(\FCMS\Core\ModuleManager::class, function ($c) {
+    $config = $c->get('config');
+    $moduleManager = new \FCMS\Core\ModuleManager(
+        $config['paths']['modules'],
+        $config['paths']['content']
+    );
+    $moduleManager->discoverModules();
+    return $moduleManager;
+});
+
 // Slim App erstellen
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -96,6 +106,10 @@ $app = AppFactory::create();
 // BasePath setzen - .htaccess leitet /admin/* zu admin.php um
 // aber der REQUEST_URI enthält noch /admin/*
 $app->setBasePath('/admin');
+
+// Module booten (nach App-Erstellung)
+$moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+$moduleManager->bootActiveModules($app, $container);
 
 // Debug-Middleware (nur mit Debug-Modus)
 if ($config['debug']['enabled']) {
@@ -121,7 +135,25 @@ function renderAdminTemplate(string $template, array $data, $container): string
     $lang = $container->get(LanguageManager::class);
     $config = $container->get('config');
 
+    // Lade Modul-Assets für Admin-Bereich
+    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+    $moduleAssets = [
+        'css' => [],
+        'js' => []
+    ];
+    
+    foreach ($moduleManager->getLoadedModules() as $module) {
+        $assets = $module->getAdminAssets();
+        if (!empty($assets['css'])) {
+            $moduleAssets['css'] = array_merge($moduleAssets['css'], $assets['css']);
+        }
+        if (!empty($assets['js'])) {
+            $moduleAssets['js'] = array_merge($moduleAssets['js'], $assets['js']);
+        }
+    }
+
     extract($data);
+    // moduleAssets ist jetzt auch als Variable verfügbar
 
     ob_start();
     include __DIR__ . '/../admin/templates/' . $template . '.php';
@@ -591,9 +623,16 @@ $app->get('/pages/edit/{slug}', function (Request $request, Response $response, 
     // Bereite Blocks JSON vor
     $blocksJson = json_encode($page['sections'] ?? []);
 
+    // Hole verfügbare Block-Typen
+    $blockRegistry = $this->get(BlockRegistry::class);
+    $availableBlocks = $blockRegistry->getAllMetadata();
+    $availableBlocksJson = json_encode($availableBlocks);
+
     $formContent = '
     <link rel="stylesheet" href="' . $adminAssets->css('block-editor.css') . '">
     <input type="hidden" id="initial_blocks_data" value=\'' . htmlspecialchars($blocksJson, ENT_QUOTES) . '\'>
+    <input type="hidden" id="available_blocks_data" value=\'' . htmlspecialchars($availableBlocksJson, ENT_QUOTES) . '\'>
+
 
     <div class="container-fluid mt-4">
         <h2><i class="bi bi-pencil-square me-2"></i>Seite bearbeiten: ' . htmlspecialchars($page['title']) . '</h2>
@@ -1283,220 +1322,111 @@ $app->get('/blocks', function (Request $request, Response $response) {
     $csrf = $this->get(CsrfManager::class);
 
     $blocks = $blockRegistry->getAllBlocks();
+    $blocksMetadata = $blockRegistry->getAllMetadata();
 
     $blocksContent = '
     <div class="container-fluid mt-4">
         <div class="page-header">
             <h1><i class="bi bi-boxes me-2"></i>Block-Bibliothek</h1>
-            <p>Übersicht aller verfügbaren Content-Blöcke mit Live-Beispielen</p>
+            <p>Übersicht aller verfügbaren Content-Blöcke (' . count($blocks) . ' Blöcke)</p>
         </div>
 
         <div class="row">';
 
-    // Paragraph Block
-    $blocksContent .= '
+    // Dynamisch alle registrierten Blöcke anzeigen
+    foreach ($blocksMetadata as $blockType => $metadata) {
+        $iconClass = $metadata['icon'] ?? 'bi-puzzle';
+        $blockName = $metadata['name'] ?? ucfirst($blockType);
+        $description = $metadata['description'] ?? 'Keine Beschreibung verfügbar';
+        $category = $metadata['category'] ?? 'other';
+        
+        // Hole den Block für Beispiel-Rendering
+        $block = $blockRegistry->get($blockType);
+        $exampleHtml = '';
+        
+        // Versuche ein Beispiel zu rendern
+        if ($block) {
+            try {
+                $defaultAttrs = $block->getDefaultAttributes();
+                // Setze Beispiel-Daten für verschiedene Block-Typen (außer Module-Blocks)
+                switch ($blockType) {
+                    case 'paragraph':
+                        $defaultAttrs['text'] = 'Dies ist ein Beispiel-Absatz. Der Paragraph-Block wird für normalen Fließtext verwendet.';
+                        break;
+                    case 'heading':
+                        $defaultAttrs['text'] = 'Beispiel-Überschrift';
+                        $defaultAttrs['level'] = 2;
+                        break;
+                    case 'quote':
+                        $defaultAttrs['text'] = 'Ein inspirierendes Zitat als Beispiel.';
+                        $defaultAttrs['author'] = 'Autor Name';
+                        break;
+                    case 'list':
+                        $defaultAttrs['items'] = ['Punkt 1', 'Punkt 2', 'Punkt 3'];
+                        $defaultAttrs['ordered'] = false;
+                        break;
+                    case 'image':
+                        $defaultAttrs['url'] = 'https://via.placeholder.com/400x200?text=Beispielbild';
+                        $defaultAttrs['alt'] = 'Beispielbild';
+                        $defaultAttrs['caption'] = 'Eine Bildunterschrift';
+                        break;
+                    case 'button':
+                        $defaultAttrs['text'] = 'Beispiel-Button';
+                        $defaultAttrs['url'] = '#';
+                        $defaultAttrs['style'] = 'primary';
+                        break;
+                    // Module-Blöcke (z.B. form) rendern sich selbst mit leeren Attributen
+                    default:
+                        break;
+                }
+                
+                $exampleHtml = $block->render($defaultAttrs, '');
+            } catch (\Exception $e) {
+                $exampleHtml = '<div class="alert alert-warning">Beispiel konnte nicht geladen werden</div>';
+            }
+        }
+        
+        $blocksContent .= '
             <div class="col-lg-6 mb-4">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="bi bi-text-paragraph text-hellblau me-2"></i>
-                            Paragraph (Absatz)
+                            <i class="bi ' . htmlspecialchars($iconClass) . ' text-hellblau me-2"></i>
+                            ' . htmlspecialchars($blockName) . '
                         </h5>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted mb-3"><small>Standardtext-Block für Fließtext und Absätze</small></p>
-
+                        <p class="text-muted mb-3"><small>' . htmlspecialchars($description) . '</small></p>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">' . htmlspecialchars($blockType) . '</span>
+                            <span class="badge bg-info">' . htmlspecialchars($category) . '</span>
+                        </div>';
+        
+        if (!empty($exampleHtml)) {
+            $blocksContent .= '
                         <h6 class="fw-bold mb-2">Beispiel:</h6>
                         <div class="border rounded p-3 bg-light mb-3">
-                            <p class="mb-0">Dies ist ein Beispiel-Absatz. Der Paragraph-Block wird für normalen Fließtext verwendet und unterstützt mehrere Zeilen. Er ist der am häufigsten verwendete Block-Typ.</p>
-                        </div>
-
-                        <h6 class="fw-bold mb-2">Verwendung:</h6>
-                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
-  "type": "paragraph",
-  "data": {
-    "text": "Ihr Text hier..."
-  }
-}</code></pre>
+                            ' . $exampleHtml . '
+                        </div>';
+        }
+        
+        $blocksContent .= '
                     </div>
                 </div>
             </div>';
-
-    // Heading Block
-    $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-type-h1 text-hellblau me-2"></i>
-                            Heading (Überschrift)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3"><small>Überschriften in verschiedenen Ebenen (H1-H6)</small></p>
-
-                        <h6 class="fw-bold mb-2">Beispiele:</h6>
-                        <div class="border rounded p-3 bg-light mb-3">
-                            <h1 class="mb-2">Überschrift H1</h1>
-                            <h2 class="mb-2">Überschrift H2</h2>
-                            <h3 class="mb-2">Überschrift H3</h3>
-                            <h4 class="mb-0">Überschrift H4</h4>
-                        </div>
-
-                        <h6 class="fw-bold mb-2">Verwendung:</h6>
-                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
-  "type": "heading",
-  "data": {
-    "text": "Ihre Überschrift",
-    "level": "2"
-  }
-}</code></pre>
-                    </div>
-                </div>
-            </div>';
-
-    // Quote Block
-    $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-quote text-hellblau me-2"></i>
-                            Quote (Zitat)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3"><small>Hervorgehobene Zitate mit optionaler Quellenangabe</small></p>
-
-                        <h6 class="fw-bold mb-2">Beispiel:</h6>
-                        <div class="border rounded p-3 bg-light mb-3">
-                            <blockquote class="blockquote mb-0">
-                                <p class="mb-2">"Das einzig Wichtige im Leben sind die Spuren von Liebe, die wir hinterlassen, wenn wir gehen."</p>
-                                <footer class="blockquote-footer">Albert Schweitzer</footer>
-                            </blockquote>
-                        </div>
-
-                        <h6 class="fw-bold mb-2">Verwendung:</h6>
-                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
-  "type": "quote",
-  "data": {
-    "text": "Ihr Zitat...",
-    "caption": "Autor (optional)"
-  }
-}</code></pre>
-                    </div>
-                </div>
-            </div>';
-
-    // List Block
-    $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-list-ul text-hellblau me-2"></i>
-                            List (Liste)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3"><small>Aufzählungen und nummerierte Listen</small></p>
-
-                        <h6 class="fw-bold mb-2">Beispiele:</h6>
-                        <div class="border rounded p-3 bg-light mb-3">
-                            <p class="fw-bold mb-2">Ungeordnet:</p>
-                            <ul class="mb-3">
-                                <li>Erstes Element</li>
-                                <li>Zweites Element</li>
-                                <li>Drittes Element</li>
-                            </ul>
-
-                            <p class="fw-bold mb-2">Geordnet:</p>
-                            <ol class="mb-0">
-                                <li>Schritt eins</li>
-                                <li>Schritt zwei</li>
-                                <li>Schritt drei</li>
-                            </ol>
-                        </div>
-
-                        <h6 class="fw-bold mb-2">Verwendung:</h6>
-                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
-  "type": "list",
-  "data": {
-    "style": "unordered",
-    "items": ["Item 1", "Item 2"]
-  }
-}</code></pre>
-                    </div>
-                </div>
-            </div>';
-
-    // Image Block
-    $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-image text-hellblau me-2"></i>
-                            Image (Bild)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3"><small>Bilder mit optionaler Bildunterschrift und Alt-Text</small></p>
-
-                        <h6 class="fw-bold mb-2">Beispiel:</h6>
-                        <div class="border rounded p-3 bg-light mb-3">
-                            <img src="https://via.placeholder.com/400x200?text=Beispielbild"
-                                 alt="Beispielbild"
-                                 class="img-fluid rounded mb-2">
-                            <p class="text-muted mb-0"><small><em>Bildunterschrift optional</em></small></p>
-                        </div>
-
-                        <h6 class="fw-bold mb-2">Verwendung:</h6>
-                        <pre class="bg-anthrazit text-white p-3 rounded"><code>{
-  "type": "image",
-  "data": {
-    "url": "/content/media/bild.jpg",
-    "alt": "Alternativtext",
-    "caption": "Bildunterschrift"
-  }
-}</code></pre>
-                    </div>
-                </div>
-            </div>';
-
-    // Info Box
-    $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-info-circle text-hellblau me-2"></i>
-                            Block-System
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3">Verfügbare Blöcke: ' . count($blocks) . '</h6>
-
-                        <p class="mb-3">Das Block-System ermöglicht flexible Content-Strukturierung. Jeder Block hat:</p>
-
-                        <ul class="mb-3">
-                            <li><strong>Type:</strong> Block-Typ (paragraph, heading, etc.)</li>
-                            <li><strong>Data:</strong> Block-spezifische Daten</li>
-                            <li><strong>Render:</strong> HTML-Ausgabe-Methode</li>
-                        </ul>
-
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-lightbulb me-2"></i>
-                            <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden.
-                        </div>
-                    </div>
-                </div>
-            </div>';
+    }
 
     $blocksContent .= '
         </div>
 
         <div class="mt-4">
+            <div class="alert alert-info">
+                <i class="bi bi-lightbulb me-2"></i>
+                <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden. 
+                Insgesamt sind <strong>' . count($blocks) . ' Blöcke</strong> verfügbar.
+            </div>
+            
             <a href="/admin" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
             </a>
@@ -1515,6 +1445,126 @@ $app->get('/blocks', function (Request $request, Response $response) {
 
     $response->getBody()->write($html);
     return $response;
+})->add($authMiddleware);
+
+// Modul-Verwaltung
+$app->get('/modules', function (Request $request, Response $response) use ($container) {
+    $adminAssets = $container->get(AdminAssetManager::class);
+    $lang = $container->get(LanguageManager::class);
+    $auth = $container->get(AuthManager::class);
+    $csrf = $container->get(CsrfManager::class);
+    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+
+    // Alle Module abrufen
+    $allModules = $moduleManager->getAllModuleInfo();
+    $activeModules = $moduleManager->getActiveModules();
+
+    $modulesContent = '<div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="mb-3">' . $lang->t('modules.title') . '</h2>
+                <p class="text-muted">' . $lang->t('modules.description') . '</p>
+            </div>
+        </div>';
+
+    if (empty($allModules)) {
+        $modulesContent .= '
+        <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">' . $lang->t('modules.no_modules_found') . '</h5>
+            <p class="mb-0">' . $lang->t('modules.no_modules_description') . '</p>
+        </div>';
+    } else {
+        $modulesContent .= '<div class="row">';
+        foreach ($allModules as $moduleId => $moduleInfo) {
+            $isActive = in_array($moduleId, $activeModules);
+            $statusBadge = $isActive
+                ? '<span class="badge bg-success">' . $lang->t('modules.active') . '</span>'
+                : '<span class="badge bg-secondary">' . $lang->t('modules.inactive') . '</span>';
+
+            $actionButton = $isActive
+                ? '<a href="/admin/modules/deactivate/' . htmlspecialchars($moduleId) . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' . $lang->t('modules.confirm_deactivate_module') . '\');">' . $lang->t('modules.deactivate') . '</a>'
+                : '<a href="/admin/modules/activate/' . htmlspecialchars($moduleId) . '" class="btn btn-sm btn-primary">' . $lang->t('modules.activate') . '</a>';
+
+            $modulesContent .= '
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">' . htmlspecialchars($moduleInfo['name']) . '</h5>
+                            ' . $statusBadge . '
+                        </div>
+                        <p class="text-muted small mb-2">Version ' . htmlspecialchars($moduleInfo['version']) . '</p>
+                        <p class="card-text">' . htmlspecialchars($moduleInfo['description']) . '</p>
+
+                        <div class="mt-3 mb-2">
+                            <small class="text-muted">
+                                <strong>' . $lang->t('modules.author') . ':</strong> ' . htmlspecialchars($moduleInfo['author']) . '<br>
+                                <strong>' . $lang->t('modules.requires') . ':</strong> fCMS ' . htmlspecialchars($moduleInfo['requires']['fcms'] ?? 'unknown') . '
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        ' . $actionButton . '
+                    </div>
+                </div>
+            </div>';
+        }
+        $modulesContent .= '</div>'; // End row
+    }
+
+    $modulesContent .= '</div>'; // End container-fluid
+
+    $html = renderAdminTemplate('layout', [
+        'content' => $modulesContent,
+        'title' => $lang->t('modules.title'),
+        'activeMenu' => 'modules',
+        'adminAssets' => $adminAssets,
+        'lang' => $lang,
+        'username' => $auth->getUsername(),
+        'csrfToken' => $csrf->getToken(),
+    ], $container);
+
+    $response->getBody()->write($html);
+    return $response;
+})->add($authMiddleware);
+
+// Modul aktivieren
+$app->get('/modules/activate/{moduleId}', function (Request $request, Response $response, array $args) use ($container) {
+    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+    $moduleId = $args['moduleId'];
+
+    try {
+        $moduleManager->activate($moduleId);
+        // Erfolg - zurück zur Modul-Übersicht
+        return $response
+            ->withHeader('Location', '/admin/modules')
+            ->withStatus(302);
+    } catch (\Exception $e) {
+        // Fehler - zurück mit Fehlermeldung (könnte man auch in Session speichern)
+        return $response
+            ->withHeader('Location', '/admin/modules')
+            ->withStatus(302);
+    }
+})->add($authMiddleware);
+
+// Modul deaktivieren
+$app->get('/modules/deactivate/{moduleId}', function (Request $request, Response $response, array $args) use ($container) {
+    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
+    $moduleId = $args['moduleId'];
+
+    try {
+        $moduleManager->deactivate($moduleId);
+        // Erfolg - zurück zur Modul-Übersicht
+
+        return $response
+            ->withHeader('Location', '/admin/modules')
+            ->withStatus(302);
+    } catch (\Exception $e) {
+        // Fehler - zurück mit Fehlermeldung
+        return $response
+            ->withHeader('Location', '/admin/modules')
+            ->withStatus(302);
+    }
 })->add($authMiddleware);
 
 // Benutzer-Profil (Platzhalter)

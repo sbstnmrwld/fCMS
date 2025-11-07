@@ -92,6 +92,19 @@
     "save": "Einstellungen speichern",
     "saved": "Einstellungen erfolgreich gespeichert"
   },
+  "modules": {
+    "title": "Module",
+    "description": "Verwalten Sie hier die installierten Module und aktivieren oder deaktivieren Sie diese nach Bedarf.",
+    "no_modules_found": "Keine Module gefunden",
+    "no_modules_description": "Es wurden keine Module im Modul-Verzeichnis gefunden. Legen Sie Module im Ordner /modules/ ab.",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "author": "Autor",
+    "requires": "Benötigt",
+    "confirm_deactivate_module": "Möchten Sie dieses Modul wirklich deaktivieren?"
+  },
   "messages": {
     "success": "Erfolgreich gespeichert",
     "error": "Ein Fehler ist aufgetreten",

@@ -1,0 +1,168 @@
+/* fCMS Form-Builder Styles */
+
+.form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2D2E32;
+}
+
+.form-description {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+.fcms-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.fcms-form .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #2D2E32;
+}
+
+.fcms-form .form-label .text-danger {
+    color: #dc3545;
+    margin-left: 0.25rem;
+}
+
+.fcms-form .form-control,
+.fcms-form .form-select {
+    display: block;
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.fcms-form .form-control:focus,
+.fcms-form .form-select:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #3FA9F5;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(63, 169, 245, 0.25);
+}
+
+.fcms-form textarea.form-control {
+    min-height: 120px;
+}
+
+.fcms-form .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.fcms-form .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+    vertical-align: top;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    appearance: none;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.fcms-form .form-check-input[type="checkbox"] {
+    border-radius: 0.25rem;
+}
+
+.fcms-form .form-check-input[type="radio"] {
+    border-radius: 50%;
+}
+
+.fcms-form .form-check-input:checked {
+    background-color: #3FA9F5;
+    border-color: #3FA9F5;
+}
+
+.fcms-form .form-check-input:focus {
+    border-color: #3FA9F5;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(63, 169, 245, 0.25);
+}
+
+.fcms-form .form-check-label {
+    margin-left: 0.5rem;
+    cursor: pointer;
+}
+
+.fcms-form .btn {
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 0.375rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.fcms-form .btn-primary {
+    color: #fff;
+    background-color: #3FA9F5;
+    border: 1px solid #3FA9F5;
+}
+
+.fcms-form .btn-primary:hover {
+    background-color: #2c8dd3;
+    border-color: #2c8dd3;
+}
+
+.fcms-form .btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Erfolgs- und Fehlermeldungen */
+.form-messages {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+}
+
+.form-messages.alert-success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+
+.form-messages.alert-danger {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    .form-container {
+        margin: 1rem;
+    }
+
+    .fcms-form .btn {
+        width: 100%;
+    }
+}

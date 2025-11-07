@@ -13,6 +13,13 @@
 
     <!-- Admin CSS -->
     <link href="<?= $adminAssets->css('admin.css') ?>" rel="stylesheet">
+
+    <!-- Module Assets (CSS) -->
+    <?php if (!empty($moduleAssets['css'])): ?>
+        <?php foreach ($moduleAssets['css'] as $cssFile): ?>
+            <link href="<?= htmlspecialchars($cssFile) ?>" rel="stylesheet">
+        <?php endforeach; ?>
+    <?php endif; ?>
 </head>
 <body>
     <!-- Admin Navigation -->
@@ -26,6 +33,7 @@
             </button>
             <div class="collapse navbar-collapse" id="adminNav">
                 <ul class="navbar-nav me-auto">
+                    <!-- Standard-Menüpunkte -->
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'dashboard' ? ' active' : '' ?>"
                            href="/admin">
@@ -60,6 +68,41 @@
                             <i class="bi bi-boxes me-1"></i>
                             Blöcke
                         </a>
+                    </li>
+                    <!-- Module-Menü mit dynamischen Einträgen -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle<?= ($activeMenu ?? '') === 'modules' ? ' active' : '' ?>" href="#" id="modulesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-puzzle me-1"></i>
+                            Module
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="modulesDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/admin/modules">
+                                    <i class="bi bi-puzzle me-1"></i> Modulverwaltung
+                                </a>
+                            </li>
+                            <?php
+                            // Dynamische Modul-Menüpunkte einfügen
+                            if (isset($container)) {
+                                $moduleManager = $container->get(FCMS\Core\ModuleManager::class);
+                                $activeModules = $moduleManager->getActiveModules();
+                                foreach ($activeModules as $moduleId) {
+                                    $module = $moduleManager->getModule($moduleId);
+                                    $config = $module ? $module->getConfig() : [];
+                                    if ($module && !empty($config['menu'])) {
+                                        $menu = $config['menu'];
+                                        $icon = !empty($menu['icon']) ? $menu['icon'] : 'bi-puzzle';
+                                        $title = !empty($menu['title']) ? $menu['title'] : ucfirst($moduleId);
+                                        $route = !empty($config['routes'][0]) ? $config['routes'][0] : '/admin/modules';
+                                        echo '<li><a class="dropdown-item" href="' . htmlspecialchars($route) . '" title="' . htmlspecialchars(json_encode($menu)) . '"><i class="bi ' . htmlspecialchars($icon) . ' me-1"></i> ' . htmlspecialchars($title) . '</a></li>';
+                                    }
+                                }
+                                // Debug-Menüpunkt
+                                echo '<li><hr class="dropdown-divider"></li>';
+                                echo '<li><a class="dropdown-item text-danger" href="#" title="Debug: Aktive Module und Menüs" onclick="alert(\'Aktive Module: ' . htmlspecialchars(json_encode($activeModules)) . '\n\nMenü-Konfigurationen: ' . htmlspecialchars(json_encode(array_map(function($id) use ($moduleManager) { $m = $moduleManager->getModule($id); return $m ? $m->config['menu'] ?? [] : []; }, $activeModules))) . '\'); return false;">Debug: Module & Menüs</a></li>';
+                            }
+                            ?>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link<?= ($activeMenu ?? '') === 'settings' ? ' active' : '' ?>"
@@ -114,6 +157,13 @@
 
     <!-- Admin JS -->
     <script src="<?= $adminAssets->js('admin.js') ?>"></script>
+
+    <!-- Module Assets -->
+    <?php if (!empty($moduleAssets['js'])): ?>
+        <?php foreach ($moduleAssets['js'] as $jsFile): ?>
+            <script src="<?= htmlspecialchars($jsFile) ?>"></script>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <!-- CSRF Token für AJAX -->
     <script>
