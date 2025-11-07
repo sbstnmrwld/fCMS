@@ -5,6 +5,20 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
+## [202511071820-dev]
+
+### Behoben
+- **ModuleManager API**: Fehler bei Asset-Loading behoben
+  - `renderAdminTemplate()` verwendete nicht-existierende Methode `getLoadedModules()`
+  - Verwendet jetzt korrekt `getActiveModules()` und `getModule($name)`
+  - Iteriert über Namen der aktiven Module und holt Instanzen einzeln
+
+### Technische Details
+- Modul-Asset-Loading nutzt jetzt die vorhandene ModuleManager-API
+- Code: `foreach ($moduleManager->getActiveModules() as $moduleName)` → `$module = $moduleManager->getModule($moduleName)`
+
+---
+
 ## [202511071800-dev]
 
 ### Hinzugefügt

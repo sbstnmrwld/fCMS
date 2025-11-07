@@ -142,13 +142,17 @@ function renderAdminTemplate(string $template, array $data, $container): string
         'js' => []
     ];
 
-    foreach ($moduleManager->getLoadedModules() as $module) {
-        $assets = $module->getAdminAssets();
-        if (!empty($assets['css'])) {
-            $moduleAssets['css'] = array_merge($moduleAssets['css'], $assets['css']);
-        }
-        if (!empty($assets['js'])) {
-            $moduleAssets['js'] = array_merge($moduleAssets['js'], $assets['js']);
+    // Hole aktive Module und deren Assets
+    foreach ($moduleManager->getActiveModules() as $moduleName) {
+        $module = $moduleManager->getModule($moduleName);
+        if ($module) {
+            $assets = $module->getAdminAssets();
+            if (!empty($assets['css'])) {
+                $moduleAssets['css'] = array_merge($moduleAssets['css'], $assets['css']);
+            }
+            if (!empty($assets['js'])) {
+                $moduleAssets['js'] = array_merge($moduleAssets['js'], $assets['js']);
+            }
         }
     }
 
