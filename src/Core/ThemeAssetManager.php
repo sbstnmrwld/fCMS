@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Theme-Asset-Manager
- * 
+ *
  * Verwaltet Assets ausschließlich für das aktive Frontend-Theme.
  * Jedes Theme hat seine eigene Asset-Struktur und ist vollständig eigenständig.
  * Keine gemeinsamen Assets mit dem Admin-Bereich oder anderen Themes.
@@ -125,7 +125,7 @@ class ThemeAssetManager
     public function switchTheme(string $themeName): void
     {
         $this->activeTheme = $themeName;
-        $this->baseUrl = rtrim($this->baseUrl, '/themes/' . $this->activeTheme . '/assets') 
+        $this->baseUrl = rtrim($this->baseUrl, '/themes/' . $this->activeTheme . '/assets')
                        . '/themes/' . $themeName . '/assets';
     }
 }

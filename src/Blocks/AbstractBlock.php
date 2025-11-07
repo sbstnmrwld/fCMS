@@ -4,7 +4,7 @@ namespace FCMS\Blocks;
 
 /**
  * Abstrakte Basis-Klasse für Blöcke
- * 
+ *
  * Bietet gemeinsame Funktionalität für alle Blöcke.
  */
 abstract class AbstractBlock implements BlockInterface

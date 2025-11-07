@@ -38,7 +38,7 @@ class HeadingBlock extends AbstractBlock
         $level = max(1, min(6, (int)$attrs['level']));
 
         $htmlAttrs = [];
-        
+
         if ($attrs['className']) {
             $htmlAttrs['class'] = $attrs['className'];
         }
@@ -53,7 +53,7 @@ class HeadingBlock extends AbstractBlock
 
         $attrString = $this->renderAttributes($htmlAttrs);
 
-        return '<h' . $level . ($attrString ? ' ' . $attrString : '') . '>' . 
+        return '<h' . $level . ($attrString ? ' ' . $attrString : '') . '>' .
                $content . '</h' . $level . '>';
     }
 
@@ -74,8 +74,8 @@ class HeadingBlock extends AbstractBlock
                     <option value="6"' . ($level == 6 ? ' selected' : '') . '>H6</option>
                 </select>
             </div>
-            <input type="text" class="form-control" value="' . 
-            $this->escape($content) . 
+            <input type="text" class="form-control" value="' .
+            $this->escape($content) .
             '" data-block-content>
         </div>';
     }

@@ -6,7 +6,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Content-Manager
- * 
+ *
  * Verwaltet Seiten und Inhalte im dateibasierten JSON-Format.
  * Implementiert File-Locking für sichere gleichzeitige Zugriffe.
  */
@@ -32,7 +32,7 @@ class ContentManager
     public function createPage(array $data): bool
     {
         $slug = $this->generateSlug($data['title'] ?? 'neue-seite');
-        
+
         // Stelle sicher, dass Slug eindeutig ist
         $slug = $this->ensureUniqueSlug($slug);
 
@@ -64,7 +64,7 @@ class ContentManager
     public function updatePage(string $slug, array $data): bool
     {
         $page = $this->getPage($slug);
-        
+
         if (!$page) {
             return false;
         }
@@ -106,7 +106,7 @@ class ContentManager
     public function deletePage(string $slug): bool
     {
         $filePath = $this->getPagePath($slug);
-        
+
         if (!file_exists($filePath)) {
             return false;
         }
@@ -142,7 +142,7 @@ class ContentManager
         foreach ($files as $file) {
             $content = file_get_contents($file);
             $page = json_decode($content, true);
-            
+
             if (is_array($page)) {
                 $pages[] = $page;
             }
@@ -162,7 +162,7 @@ class ContentManager
     public function getPublishedPages(): array
     {
         $pages = $this->getAllPages();
-        
+
         return array_filter($pages, function($page) {
             return ($page['status'] ?? 'draft') === 'published';
         });
@@ -174,7 +174,7 @@ class ContentManager
     public function getNavigationPages(string $location = 'main'): array
     {
         $pages = $this->getPublishedPages();
-        
+
         return array_filter($pages, function($page) use ($location) {
             return ($page['navigation'][$location] ?? false) === true;
         });
@@ -190,7 +190,7 @@ class ContentManager
 
         // Öffne Datei mit exklusivem Lock
         $handle = fopen($filePath, 'c');
-        
+
         if (!$handle) {
             return false;
         }

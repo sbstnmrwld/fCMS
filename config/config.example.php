@@ -1,7 +1,7 @@
 <?php
 /**
  * fCMS - Dateibasiertes Content-Management-System
- * 
+ *
  * Beispiel-Konfigurationsdatei
  * Kopieren Sie diese Datei zu config.php und passen Sie die Werte an.
  */
@@ -44,12 +44,12 @@ return [
 
     // Pfade (relativ zum Webroot)
     'paths' => [
-        'content' => __DIR__ . '/../content',
-        'themes' => __DIR__ . '/../themes',
-        'admin' => __DIR__ . '/../admin',
-        'languages' => __DIR__ . '/../languages',
-        'blocks' => __DIR__ . '/../blocks',
-        'logs' => __DIR__ . '/../logs',
+        'content' => __DIR__ . '../content',
+        'themes' => __DIR__ . '../themes',
+        'admin' => __DIR__ . '../admin',
+        'languages' => __DIR__ . '../languages',
+        'blocks' => __DIR__ . '../blocks',
+        'logs' => __DIR__ . '../logs',
     ],
 
     // DSGVO-Einstellungen

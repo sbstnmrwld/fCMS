@@ -1,7 +1,7 @@
 <?php
 /**
  * fCMS - Admin Entry Point
- * 
+ *
  * Verarbeitet alle Admin-Requests mit Session-basierter Authentifizierung.
  */
 
@@ -101,9 +101,9 @@ function renderAdminTemplate(string $template, array $data, $container): string
     $adminAssets = $container->get(AdminAssetManager::class);
     $lang = $container->get(LanguageManager::class);
     $config = $container->get('config');
-    
+
     extract($data);
-    
+
     ob_start();
     include __DIR__ . '/../admin/templates/' . $template . '.php';
     return ob_get_clean();
@@ -112,23 +112,23 @@ function renderAdminTemplate(string $template, array $data, $container): string
 // Login-Seite
 $app->get('/login', function (Request $request, Response $response) {
     $auth = $this->get(AuthManager::class);
-    
+
     if ($auth->isAuthenticated()) {
         return $response->withHeader('Location', '/admin')->withStatus(302);
     }
-    
+
     $csrf = $this->get(CsrfManager::class);
     $adminAssets = $this->get(AdminAssetManager::class);
     $lang = $this->get(LanguageManager::class);
     $config = $this->get('config');
-    
+
     $html = renderAdminTemplate('login', [
         'csrfField' => $csrf->getTokenField(),
         'adminAssets' => $adminAssets,
         'lang' => $lang,
         'config' => $config,
     ], $this);
-    
+
     $response->getBody()->write($html);
     return $response;
 });
@@ -137,21 +137,21 @@ $app->get('/login', function (Request $request, Response $response) {
 $app->post('/login', function (Request $request, Response $response) {
     $auth = $this->get(AuthManager::class);
     $csrf = $this->get(CsrfManager::class);
-    
+
     $data = $request->getParsedBody();
-    
+
     if (!$csrf->validateRequest($data)) {
         $response->getBody()->write('CSRF-Validierung fehlgeschlagen');
         return $response->withStatus(403);
     }
-    
+
     $lockoutTime = $auth->getLockoutTimeRemaining();
-    
+
     if ($lockoutTime > 0) {
         $adminAssets = $this->get(AdminAssetManager::class);
         $lang = $this->get(LanguageManager::class);
         $config = $this->get('config');
-        
+
         $html = renderAdminTemplate('login', [
             'csrfField' => $csrf->getTokenField(),
             'lockoutTime' => $lockoutTime,
@@ -159,22 +159,22 @@ $app->post('/login', function (Request $request, Response $response) {
             'lang' => $lang,
             'config' => $config,
         ], $this);
-        
+
         $response->getBody()->write($html);
         return $response;
     }
-    
+
     $username = $data['username'] ?? '';
     $password = $data['password'] ?? '';
-    
+
     if ($auth->attempt($username, $password)) {
         return $response->withHeader('Location', '/admin')->withStatus(302);
     }
-    
+
     $adminAssets = $this->get(AdminAssetManager::class);
     $lang = $this->get(LanguageManager::class);
     $config = $this->get('config');
-    
+
     $html = renderAdminTemplate('login', [
         'csrfField' => $csrf->getTokenField(),
         'error' => $lang->t('login.error'),
@@ -182,7 +182,7 @@ $app->post('/login', function (Request $request, Response $response) {
         'lang' => $lang,
         'config' => $config,
     ], $this);
-    
+
     $response->getBody()->write($html);
     return $response;
 });
@@ -197,11 +197,11 @@ $app->get('/logout', function (Request $request, Response $response) {
 // Auth-Middleware für geschützte Routen
 $authMiddleware = function (Request $request, $handler) {
     $auth = $this->get(AuthManager::class);
-    
+
     if (!$auth->isAuthenticated()) {
         return $this->get('response')->withHeader('Location', '/admin/login')->withStatus(302);
     }
-    
+
     return $handler->handle($request);
 };
 
@@ -212,10 +212,10 @@ $app->get('', function (Request $request, Response $response) {
     $lang = $this->get(LanguageManager::class);
     $auth = $this->get(AuthManager::class);
     $csrf = $this->get(CsrfManager::class);
-    
+
     $allPages = $contentManager->getAllPages();
     $publishedPages = $contentManager->getPublishedPages();
-    
+
     $dashboardContent = '<div class="row">
         <div class="col-md-4 mb-4">
             <div class="card dashboard-card shadow-sm">
@@ -246,14 +246,14 @@ $app->get('', function (Request $request, Response $response) {
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col-12">
             <h3>Willkommen im fCMS Admin-Bereich</h3>
             <p>Verwalten Sie hier Ihre Website-Inhalte, Navigation und Einstellungen.</p>
         </div>
     </div>';
-    
+
     $html = renderAdminTemplate('layout', [
         'content' => $dashboardContent,
         'title' => $lang->t('admin.dashboard'),
@@ -263,7 +263,7 @@ $app->get('', function (Request $request, Response $response) {
         'username' => $auth->getUsername(),
         'csrfToken' => $csrf->getToken(),
     ], $this);
-    
+
     $response->getBody()->write($html);
     return $response;
 })->add($authMiddleware);

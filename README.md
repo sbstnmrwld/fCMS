@@ -395,10 +395,10 @@ themes/
 <head>
     <meta charset="UTF-8">
     <title><?= $page['title'] ?? 'Home' ?> - <?= $siteName ?></title>
-    
+
     <!-- Bootstrap aus Theme-Assets -->
     <link href="<?= $assets->bootstrapCss() ?>" rel="stylesheet">
-    
+
     <!-- Theme CSS -->
     <link href="<?= $assets->css('style.css') ?>" rel="stylesheet">
 </head>
@@ -406,18 +406,18 @@ themes/
     <nav class="navbar navbar-expand-lg">
         <!-- Navigation -->
     </nav>
-    
+
     <main>
         <?= $content ?>
     </main>
-    
+
     <footer>
         <!-- Footer -->
     </footer>
-    
+
     <!-- Bootstrap JS aus Theme-Assets -->
     <script src="<?= $assets->bootstrapJs() ?>"></script>
-    
+
     <!-- Theme JS -->
     <script src="<?= $assets->js('main.js') ?>"></script>
 </body>
@@ -430,7 +430,7 @@ themes/
 <div class="container">
     <article>
         <h1><?= htmlspecialchars($page['title']) ?></h1>
-        
+
         <?php foreach ($page['sections'] as $section): ?>
             <?= $section['html'] ?>
         <?php endforeach; ?>
@@ -531,38 +531,38 @@ class CustomBlock extends AbstractBlock
     public function render(array $attributes, string $content = ''): string
     {
         $attrs = $this->mergeAttributes($attributes);
-        
-        $html = '<div class="custom-block" style="color: ' . 
+
+        $html = '<div class="custom-block" style="color: ' .
                 $this->escape($attrs['color']) . '">';
         $html .= '<h3>' . $this->escape($attrs['title']) . '</h3>';
         $html .= '<p>' . $this->escape($attrs['content']) . '</p>';
         $html .= '</div>';
-        
+
         return $html;
     }
 
     public function renderEditor(array $attributes, string $content = ''): string
     {
         $attrs = $this->mergeAttributes($attributes);
-        
+
         return '<div class="block-editor custom-block">
             <div class="mb-2">
                 <label class="form-label">Titel</label>
-                <input type="text" class="form-control" 
-                       value="' . $this->escape($attrs['title']) . '" 
+                <input type="text" class="form-control"
+                       value="' . $this->escape($attrs['title']) . '"
                        data-block-attr="title">
             </div>
             <div class="mb-2">
                 <label class="form-label">Inhalt</label>
-                <textarea class="form-control" rows="3" 
-                          data-block-content>' . 
-                $this->escape($attrs['content']) . 
+                <textarea class="form-control" rows="3"
+                          data-block-content>' .
+                $this->escape($attrs['content']) .
                 '</textarea>
             </div>
             <div class="mb-2">
                 <label class="form-label">Farbe</label>
-                <input type="color" class="form-control" 
-                       value="' . $this->escape($attrs['color']) . '" 
+                <input type="color" class="form-control"
+                       value="' . $this->escape($attrs['color']) . '"
                        data-block-attr="color">
             </div>
         </div>';
@@ -589,16 +589,16 @@ interface BlockInterface
 {
     // Metadaten für Block-Palette
     public function getMetadata(): array;
-    
+
     // Standard-Werte für Attribute
     public function getDefaultAttributes(): array;
-    
+
     // Frontend-Rendering (für Website)
     public function render(array $attributes, string $content = ''): string;
-    
+
     // Editor-Rendering (für Admin-Bereich)
     public function renderEditor(array $attributes, string $content = ''): string;
-    
+
     // Validierung der Attribute
     public function validate(array $attributes): bool;
 }

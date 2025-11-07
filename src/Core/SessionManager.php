@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Session-Manager mit Sicherheits-Features
- * 
+ *
  * Verwaltet sichere Sessions für den Admin-Bereich mit:
  * - HTTP-Only und Secure Cookies
  * - Session-Regeneration nach Login
@@ -34,7 +34,7 @@ class SessionManager
         ini_set('session.cookie_httponly', '1');
         ini_set('session.use_only_cookies', '1');
         ini_set('session.cookie_samesite', $this->config['cookie_samesite']);
-        
+
         if ($this->config['cookie_secure']) {
             ini_set('session.cookie_secure', '1');
         }
@@ -131,15 +131,15 @@ class SessionManager
     private function checkTimeout(): void
     {
         $lastActivity = $this->get('last_activity');
-        
+
         if ($lastActivity !== null) {
             $sessionLifetime = $this->config['session_lifetime'] ?? 1800;
-            
+
             if (time() - $lastActivity > $sessionLifetime) {
                 $this->destroy();
             }
         }
-        
+
         $this->updateActivity();
     }
 

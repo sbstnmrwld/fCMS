@@ -64,12 +64,12 @@ class ImageBlock extends AbstractBlock
 
         $html = '<figure class="' . $this->escape($figureClass) . '">';
         $html .= '<img ' . $this->renderAttributes($imgAttrs) . '>';
-        
+
         if ($attrs['caption']) {
-            $html .= '<figcaption class="wp-element-caption">' . 
+            $html .= '<figcaption class="wp-element-caption">' .
                      $this->escape($attrs['caption']) . '</figcaption>';
         }
-        
+
         $html .= '</figure>';
 
         return $html;
@@ -83,22 +83,22 @@ class ImageBlock extends AbstractBlock
             <div class="mb-2">
                 <label class="form-label">Bild-URL</label>
                 <div class="input-group">
-                    <input type="url" class="form-control" value="' . 
-                    $this->escape($attrs['url']) . 
+                    <input type="url" class="form-control" value="' .
+                    $this->escape($attrs['url']) .
                     '" data-block-attr="url" placeholder="https://...">
                     <button class="btn btn-outline-secondary" type="button">Durchsuchen</button>
                 </div>
             </div>
             <div class="mb-2">
                 <label class="form-label">Alt-Text</label>
-                <input type="text" class="form-control" value="' . 
-                $this->escape($attrs['alt']) . 
+                <input type="text" class="form-control" value="' .
+                $this->escape($attrs['alt']) .
                 '" data-block-attr="alt">
             </div>
             <div class="mb-2">
                 <label class="form-label">Bildunterschrift</label>
-                <input type="text" class="form-control" value="' . 
-                $this->escape($attrs['caption']) . 
+                <input type="text" class="form-control" value="' .
+                $this->escape($attrs['caption']) .
                 '" data-block-attr="caption">
             </div>
             ' . ($attrs['url'] ? '<img src="' . $this->escape($attrs['url']) . '" class="img-fluid mt-2" alt="">' : '') . '

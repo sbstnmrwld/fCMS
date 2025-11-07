@@ -4,7 +4,7 @@ namespace FCMS\Blocks;
 
 /**
  * Block-Interface
- * 
+ *
  * Definiert die Schnittstelle für alle Block-Typen.
  * Jeder Block muss diese Methoden implementieren.
  */

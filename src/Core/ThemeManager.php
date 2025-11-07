@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Theme-Manager
- * 
+ *
  * Verwaltet Themes und stellt Template-Rendering-Funktionalität bereit.
  */
 class ThemeManager
@@ -15,8 +15,8 @@ class ThemeManager
     private LanguageManager $language;
 
     public function __construct(
-        string $themesPath, 
-        string $activeTheme, 
+        string $themesPath,
+        string $activeTheme,
         ThemeAssetManager $assetManager,
         LanguageManager $language
     ) {

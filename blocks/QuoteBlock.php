@@ -40,22 +40,22 @@ class QuoteBlock extends AbstractBlock
         }
 
         $classes = ['wp-block-quote'];
-        
+
         if ($attrs['align']) {
             $classes[] = 'text-' . $attrs['align'];
         }
-        
+
         if ($attrs['className']) {
             $classes[] = $attrs['className'];
         }
 
         $html = '<blockquote class="' . implode(' ', $classes) . '">';
         $html .= '<p>' . $content . '</p>';
-        
+
         if ($attrs['citation']) {
             $html .= '<cite>' . $this->escape($attrs['citation']) . '</cite>';
         }
-        
+
         $html .= '</blockquote>';
 
         return $html;
@@ -69,14 +69,14 @@ class QuoteBlock extends AbstractBlock
         return '<div class="block-editor quote-block">
             <div class="mb-2">
                 <label class="form-label">Zitat</label>
-                <textarea class="form-control" rows="3" data-block-content>' . 
-                $this->escape($content) . 
+                <textarea class="form-control" rows="3" data-block-content>' .
+                $this->escape($content) .
                 '</textarea>
             </div>
             <div class="mb-2">
                 <label class="form-label">Quelle (optional)</label>
-                <input type="text" class="form-control" value="' . 
-                $this->escape($attrs['citation']) . 
+                <input type="text" class="form-control" value="' .
+                $this->escape($attrs['citation']) .
                 '" data-block-attr="citation" placeholder="z.B. Albert Einstein">
             </div>
         </div>';

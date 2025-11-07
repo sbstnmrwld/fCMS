@@ -1,7 +1,7 @@
 <?php
 /**
  * fCMS - Frontend Entry Point
- * 
+ *
  * Verarbeitet alle Frontend-Requests und rendert Seiten mit dem aktiven Theme.
  */
 
@@ -132,7 +132,7 @@ $app->get('/', function (Request $request, Response $response) {
 
 $app->get('/{slug}', function (Request $request, Response $response, array $args) {
     $slug = $args['slug'];
-    
+
     $contentManager = $this->get(ContentManager::class);
     $themeManager = $this->get(ThemeManager::class);
     $blockRegistry = $this->get(BlockRegistry::class);

@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page) ? htmlspecialchars($page['title']) : 'Home' ?> - <?= htmlspecialchars($siteName ?? 'fCMS') ?></title>
-    
+
     <?php if (isset($page['meta']['description']) && $page['meta']['description']): ?>
     <meta name="description" content="<?= htmlspecialchars($page['meta']['description']) ?>">
     <?php endif; ?>
-    
+
     <?php if (isset($page['meta']['keywords']) && $page['meta']['keywords']): ?>
     <meta name="keywords" content="<?= htmlspecialchars($page['meta']['keywords']) ?>">
     <?php endif; ?>
-    
+
     <!-- Bootstrap CSS (aus Theme-Assets) -->
     <link href="<?= $assets->bootstrapCss() ?>" rel="stylesheet">
-    
+
     <!-- Theme CSS -->
     <link href="<?= $assets->css('style.css') ?>" rel="stylesheet">
 </head>
@@ -32,7 +32,7 @@
                     <?php if (isset($navigation) && !empty($navigation)): ?>
                         <?php foreach ($navigation as $item): ?>
                             <li class="nav-item">
-                                <a class="nav-link<?= (isset($page) && $page['slug'] === $item['slug']) ? ' active' : '' ?>" 
+                                <a class="nav-link<?= (isset($page) && $page['slug'] === $item['slug']) ? ' active' : '' ?>"
                                    href="/<?= htmlspecialchars($item['slug']) ?>">
                                     <?= htmlspecialchars($item['title']) ?>
                                 </a>
@@ -75,7 +75,7 @@
 
     <!-- Bootstrap JS (aus Theme-Assets) -->
     <script src="<?= $assets->bootstrapJs() ?>"></script>
-    
+
     <!-- Theme JS -->
     <script src="<?= $assets->js('main.js') ?>"></script>
 </body>

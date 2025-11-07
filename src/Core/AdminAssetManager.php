@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Admin-Asset-Manager
- * 
+ *
  * Verwaltet Assets ausschließlich für den Admin-Bereich.
  * Alle Assets liegen in /admin/assets/ und sind vom Frontend getrennt.
  */

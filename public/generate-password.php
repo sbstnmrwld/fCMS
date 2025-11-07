@@ -1,7 +1,7 @@
 <?php
 /**
  * fCMS Passwort-Hash-Generator
- * 
+ *
  * SICHERHEITSHINWEIS: Löschen Sie diese Datei nach dem ersten Gebrauch!
  */
 
@@ -102,26 +102,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <h1>🔐 Passwort-Hash-Generator</h1>
-        
+
         <div class="warning">
             <strong>⚠️ Sicherheitshinweis:</strong> Löschen Sie diese Datei nach dem Generieren Ihres Passwort-Hashes!
         </div>
-        
+
         <form method="POST">
             <div class="form-group">
                 <label for="password">Ihr gewünschtes Passwort:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            
+
             <button type="submit">Hash generieren</button>
         </form>
-        
+
         <?php if (isset($hash)): ?>
         <div class="result">
             <strong>Ihr Passwort-Hash:</strong><br>
             <textarea rows="3" readonly onclick="this.select()"><?= htmlspecialchars($hash) ?></textarea>
         </div>
-        
+
         <div class="instructions">
             <strong>So verwenden Sie den Hash:</strong>
             <ol>

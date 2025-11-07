@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Admin' ?> - fCMS Verwaltung</title>
-    
+
     <!-- Bootstrap CSS (aus Admin-Assets) -->
     <link href="<?= $adminAssets->bootstrapCss() ?>" rel="stylesheet">
-    
+
     <!-- Admin CSS -->
     <link href="<?= $adminAssets->css('admin.css') ?>" rel="stylesheet">
 </head>
@@ -24,31 +24,31 @@
             <div class="collapse navbar-collapse" id="adminNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link<?= ($activeMenu ?? '') === 'dashboard' ? ' active' : '' ?>" 
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'dashboard' ? ' active' : '' ?>"
                            href="/admin">
                             <?= $lang->t('admin.dashboard') ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link<?= ($activeMenu ?? '') === 'pages' ? ' active' : '' ?>" 
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'pages' ? ' active' : '' ?>"
                            href="/admin/pages">
                             <?= $lang->t('admin.pages') ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link<?= ($activeMenu ?? '') === 'navigation' ? ' active' : '' ?>" 
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'navigation' ? ' active' : '' ?>"
                            href="/admin/navigation">
                             <?= $lang->t('admin.navigation') ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link<?= ($activeMenu ?? '') === 'media' ? ' active' : '' ?>" 
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'media' ? ' active' : '' ?>"
                            href="/admin/media">
                             <?= $lang->t('admin.media') ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link<?= ($activeMenu ?? '') === 'settings' ? ' active' : '' ?>" 
+                        <a class="nav-link<?= ($activeMenu ?? '') === 'settings' ? ' active' : '' ?>"
                            href="/admin/settings">
                             <?= $lang->t('admin.settings') ?>
                         </a>
@@ -56,7 +56,7 @@
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" 
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
                            data-bs-toggle="dropdown">
                             <?= htmlspecialchars($username ?? 'Admin') ?>
                         </a>
@@ -93,10 +93,10 @@
 
     <!-- Bootstrap JS (aus Admin-Assets) -->
     <script src="<?= $adminAssets->bootstrapJs() ?>"></script>
-    
+
     <!-- Admin JS -->
     <script src="<?= $adminAssets->js('admin.js') ?>"></script>
-    
+
     <!-- CSRF Token für AJAX -->
     <script>
         window.FCMS = {

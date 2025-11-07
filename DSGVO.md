@@ -108,8 +108,8 @@ Name und Kontaktdaten des Verantwortlichen gemäß Art. 13 DSGVO
 #### 2. Server-Logs
 
 ```
-Beim Besuch unserer Website werden durch den Webserver automatisch 
-technische Informationen protokolliert (Server-Logs). Dies liegt in 
+Beim Besuch unserer Website werden durch den Webserver automatisch
+technische Informationen protokolliert (Server-Logs). Dies liegt in
 der Verantwortung Ihres Hosting-Anbieters, nicht von fCMS.
 
 Typische Server-Log-Einträge:
@@ -119,15 +119,15 @@ Typische Server-Log-Einträge:
 - Browser-Typ und -Version
 - Betriebssystem
 
-Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse 
+Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
 an der technischen Funktionsfähigkeit der Website)
 ```
 
 #### 3. Admin-Bereich
 
 ```
-Unser Admin-Bereich verwendet technisch notwendige Session-Cookies 
-zur Authentifizierung. Diese Cookies enthalten keine personenbezogenen 
+Unser Admin-Bereich verwendet technisch notwendige Session-Cookies
+zur Authentifizierung. Diese Cookies enthalten keine personenbezogenen
 Daten und werden nach Beendigung der Sitzung gelöscht.
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
@@ -136,19 +136,19 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
 #### 4. Keine Tracking-Technologien
 
 ```
-Unsere Website verwendet keine Tracking-Technologien, keine Cookies 
-im öffentlichen Bereich und keine Analytics-Dienste. Es werden keine 
+Unsere Website verwendet keine Tracking-Technologien, keine Cookies
+im öffentlichen Bereich und keine Analytics-Dienste. Es werden keine
 Nutzerdaten erhoben oder analysiert.
 ```
 
 #### 5. Kontaktformular (falls implementiert)
 
 ```
-Bei Nutzung des Kontaktformulars werden Ihre Angaben (Name, E-Mail, 
-Nachricht) lokal auf unserem Server gespeichert. Eine Weitergabe an 
+Bei Nutzung des Kontaktformulars werden Ihre Angaben (Name, E-Mail,
+Nachricht) lokal auf unserem Server gespeichert. Eine Weitergabe an
 Dritte erfolgt nicht.
 
-Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) oder 
+Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) oder
 Art. 6 Abs. 1 lit. b DSGVO (Vertragsanbahnung)
 
 Speicherdauer: [Ihre Speicherdauer angeben]
@@ -246,5 +246,5 @@ Bei Fragen zur DSGVO-Konformität von fCMS:
 
 ---
 
-Letzte Aktualisierung: November 2025  
+Letzte Aktualisierung: November 2025
 fCMS Version: 1.0.0

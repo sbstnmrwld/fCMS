@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Language-Manager
- * 
+ *
  * Verwaltet Mehrsprachigkeit durch JSON-basierte Sprachdateien.
  * Standard-Sprache ist Deutsch, weitere Sprachen können einfach hinzugefügt werden.
  */

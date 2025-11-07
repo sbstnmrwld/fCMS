@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang->t('login.title') ?> - fCMS</title>
-    
+
     <!-- Bootstrap CSS (aus Admin-Assets) -->
     <link href="<?= $adminAssets->bootstrapCss() ?>" rel="stylesheet">
-    
+
     <!-- Admin CSS -->
     <link href="<?= $adminAssets->css('admin.css') ?>" rel="stylesheet">
 </head>
@@ -41,7 +41,7 @@
                                 <label for="username" class="form-label">
                                     <?= $lang->t('login.username') ?>
                                 </label>
-                                <input type="text" class="form-control" id="username" 
+                                <input type="text" class="form-control" id="username"
                                        name="username" required autofocus>
                             </div>
 
@@ -49,11 +49,11 @@
                                 <label for="password" class="form-label">
                                     <?= $lang->t('login.password') ?>
                                 </label>
-                                <input type="password" class="form-control" id="password" 
+                                <input type="password" class="form-control" id="password"
                                        name="password" required>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100" 
+                            <button type="submit" class="btn btn-primary w-100"
                                     <?= (isset($lockoutTime) && $lockoutTime > 0) ? 'disabled' : '' ?>>
                                 <?= $lang->t('login.submit') ?>
                             </button>

@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * Authentifizierungs-Manager
- * 
+ *
  * Verwaltet Admin-Login mit:
  * - Passwort-Verifizierung
  * - Login-Throttling gegen Brute-Force
@@ -144,7 +144,7 @@ class AuthManager
     private function isLocked(): bool
     {
         $attempts = $this->getAttempts();
-        
+
         if (empty($attempts)) {
             return false;
         }

@@ -67,7 +67,7 @@ class ListBlock extends AbstractBlock
         return '<div class="block-editor list-block">
             <div class="mb-2">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="listOrdered" 
+                    <input class="form-check-input" type="checkbox" id="listOrdered"
                            data-block-attr="ordered"' . ($attrs['ordered'] ? ' checked' : '') . '>
                     <label class="form-check-label" for="listOrdered">
                         Nummerierte Liste
@@ -76,8 +76,8 @@ class ListBlock extends AbstractBlock
             </div>
             <div class="mb-2">
                 <label class="form-label">Listeneinträge (ein Eintrag pro Zeile)</label>
-                <textarea class="form-control" rows="5" data-block-items>' . 
-                $this->escape($itemsText) . 
+                <textarea class="form-control" rows="5" data-block-items>' .
+                $this->escape($itemsText) .
                 '</textarea>
             </div>
         </div>';

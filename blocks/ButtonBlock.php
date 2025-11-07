@@ -41,11 +41,11 @@ class ButtonBlock extends AbstractBlock
         }
 
         $classes = ['btn', 'btn-' . $attrs['style']];
-        
+
         if ($attrs['size']) {
             $classes[] = 'btn-' . $attrs['size'];
         }
-        
+
         if ($attrs['className']) {
             $classes[] = $attrs['className'];
         }
@@ -71,14 +71,14 @@ class ButtonBlock extends AbstractBlock
         return '<div class="block-editor button-block">
             <div class="mb-2">
                 <label class="form-label">Button-Text</label>
-                <input type="text" class="form-control" value="' . 
-                $this->escape($attrs['text']) . 
+                <input type="text" class="form-control" value="' .
+                $this->escape($attrs['text']) .
                 '" data-block-attr="text">
             </div>
             <div class="mb-2">
                 <label class="form-label">Link-URL</label>
-                <input type="url" class="form-control" value="' . 
-                $this->escape($attrs['url']) . 
+                <input type="url" class="form-control" value="' .
+                $this->escape($attrs['url']) .
                 '" data-block-attr="url">
             </div>
             <div class="row">

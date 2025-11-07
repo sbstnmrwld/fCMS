@@ -38,7 +38,7 @@ class ParagraphBlock extends AbstractBlock
         $content = $content ?: $attrs['content'];
 
         $htmlAttrs = [];
-        
+
         if ($attrs['className']) {
             $htmlAttrs['class'] = $attrs['className'];
         }
@@ -73,8 +73,8 @@ class ParagraphBlock extends AbstractBlock
         $content = $content ?: $attrs['content'];
 
         return '<div class="block-editor paragraph-block">
-            <textarea class="form-control" rows="3" data-block-content>' . 
-            $this->escape($content) . 
+            <textarea class="form-control" rows="3" data-block-content>' .
+            $this->escape($content) .
             '</textarea>
         </div>';
     }

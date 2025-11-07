@@ -4,7 +4,7 @@ namespace FCMS\Core;
 
 /**
  * CSRF-Token-Manager
- * 
+ *
  * Generiert und validiert CSRF-Tokens für alle Admin-Formulare
  */
 class CsrfManager
@@ -33,7 +33,7 @@ class CsrfManager
     public function getToken(): string
     {
         $token = $this->session->get($this->tokenKey);
-        
+
         if ($token === null) {
             $token = $this->generateToken();
         }
@@ -47,7 +47,7 @@ class CsrfManager
     public function validateToken(string $token): bool
     {
         $sessionToken = $this->session->get($this->tokenKey);
-        
+
         if ($sessionToken === null) {
             return false;
         }

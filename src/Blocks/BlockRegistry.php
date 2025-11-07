@@ -4,7 +4,7 @@ namespace FCMS\Blocks;
 
 /**
  * Block-Registry
- * 
+ *
  * Verwaltet alle registrierten Blöcke und ermöglicht automatische Block-Discovery.
  */
 class BlockRegistry
@@ -72,15 +72,15 @@ class BlockRegistry
 
         foreach ($files as $file) {
             $className = $this->getClassNameFromFile($file);
-            
+
             if ($className && class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
-                
+
                 if ($reflection->implementsInterface(BlockInterface::class) && !$reflection->isAbstract()) {
                     $block = new $className();
                     $metadata = $block->getMetadata();
                     $blockName = $metadata['name'] ?? basename($file, '.php');
-                    
+
                     $this->register($blockName, $block);
                 }
             }
@@ -93,7 +93,7 @@ class BlockRegistry
     private function getClassNameFromFile(string $file): ?string
     {
         $content = file_get_contents($file);
-        
+
         // Finde Namespace
         if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatch)) {
             $namespace = $namespaceMatch[1];
@@ -125,7 +125,7 @@ class BlockRegistry
         try {
             return $block->render($attributes, $content);
         } catch (\Exception $e) {
-            return '<!-- Fehler beim Rendern von Block "' . htmlspecialchars($blockName) . '": ' . 
+            return '<!-- Fehler beim Rendern von Block "' . htmlspecialchars($blockName) . '": ' .
                    htmlspecialchars($e->getMessage()) . ' -->';
         }
     }
