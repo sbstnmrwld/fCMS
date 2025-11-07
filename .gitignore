@@ -1,0 +1,37 @@
+# Vendor
+/vendor/
+
+# Content (user generated)
+/content/pages/*.json
+/content/media/*
+!/content/pages/.gitkeep
+!/content/media/.gitkeep
+
+# Config (user specific)
+/config/config.php
+!/config/config.example.php
+
+# Logs
+/logs/*.log
+!/logs/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/releases/
+/build/temp/
+
+# Composer
+composer.lock
+composer.phar
+
+# Environment
+.env
+.env.local

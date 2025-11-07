@@ -1,0 +1,133 @@
+{
+  "app": {
+    "name": "fCMS",
+    "tagline": "Dateibasiertes Content-Management-System"
+  },
+  "admin": {
+    "title": "Verwaltung",
+    "dashboard": "Dashboard",
+    "pages": "Seiten",
+    "navigation": "Navigation",
+    "media": "Medien",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "login": {
+    "title": "Anmeldung",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "error": "Ungültiger Benutzername oder Passwort",
+    "locked": "Zu viele Anmeldeversuche. Bitte warten Sie {minutes} Minuten.",
+    "session_notice": "Diese Anwendung verwendet technisch notwendige Session-Cookies für die Authentifizierung."
+  },
+  "pages": {
+    "title": "Seiten verwalten",
+    "create": "Neue Seite erstellen",
+    "edit": "Seite bearbeiten",
+    "delete": "Seite löschen",
+    "delete_confirm": "Möchten Sie diese Seite wirklich löschen?",
+    "name": "Seitenname",
+    "slug": "URL-Slug",
+    "status": "Status",
+    "published": "Veröffentlicht",
+    "draft": "Entwurf",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "blocks": {
+    "add": "Block hinzufügen",
+    "paragraph": "Absatz",
+    "heading": "Überschrift",
+    "image": "Bild",
+    "list": "Liste",
+    "quote": "Zitat",
+    "code": "Code",
+    "table": "Tabelle",
+    "button": "Button",
+    "columns": "Spalten",
+    "group": "Gruppe",
+    "cover": "Cover",
+    "media_text": "Medien & Text",
+    "gallery": "Galerie",
+    "audio": "Audio",
+    "video": "Video",
+    "file": "Datei",
+    "separator": "Trenner",
+    "spacer": "Abstandhalter",
+    "html": "Benutzerdefiniertes HTML",
+    "move_up": "Nach oben verschieben",
+    "move_down": "Nach unten verschieben",
+    "delete": "Block löschen",
+    "edit": "Block bearbeiten"
+  },
+  "navigation": {
+    "title": "Navigation verwalten",
+    "main": "Hauptnavigation",
+    "footer": "Footer-Navigation",
+    "hidden": "Nicht anzeigen",
+    "visibility": "Sichtbarkeit",
+    "order": "Reihenfolge",
+    "save": "Navigation speichern"
+  },
+  "media": {
+    "title": "Medien-Bibliothek",
+    "upload": "Dateien hochladen",
+    "delete": "Datei löschen",
+    "select": "Auswählen",
+    "selected": "Ausgewählt",
+    "file_name": "Dateiname",
+    "file_size": "Dateigröße",
+    "upload_date": "Upload-Datum"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "site_name": "Website-Name",
+    "site_url": "Website-URL",
+    "language": "Sprache",
+    "timezone": "Zeitzone",
+    "theme": "Theme",
+    "theme_select": "Theme auswählen",
+    "save": "Einstellungen speichern",
+    "saved": "Einstellungen erfolgreich gespeichert"
+  },
+  "messages": {
+    "success": "Erfolgreich gespeichert",
+    "error": "Ein Fehler ist aufgetreten",
+    "invalid_csrf": "Ungültiges Sicherheits-Token. Bitte versuchen Sie es erneut.",
+    "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen",
+    "not_found": "Die angeforderte Ressource wurde nicht gefunden",
+    "validation_error": "Bitte überprüfen Sie Ihre Eingaben"
+  },
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "loading": "Laden...",
+    "no_results": "Keine Ergebnisse gefunden"
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "min_length": "Mindestens {min} Zeichen erforderlich",
+    "max_length": "Maximal {max} Zeichen erlaubt",
+    "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "url": "Bitte geben Sie eine gültige URL ein",
+    "numeric": "Bitte geben Sie eine Zahl ein"
+  },
+  "errors": {
+    "404": "Seite nicht gefunden",
+    "403": "Zugriff verweigert",
+    "500": "Interner Serverfehler",
+    "generic": "Ein unerwarteter Fehler ist aufgetreten"
+  }
+}

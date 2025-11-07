@@ -1,0 +1,47 @@
+# fCMS - Apache Configuration
+
+# Aktiviere Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Admin-Bereich
+    RewriteRule ^admin(/.*)?$ admin.php [QSA,L]
+    
+    # Frontend-Routing (alles außer existierende Dateien)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Sicherheit
+<IfModule mod_headers.c>
+    # Verhindere Clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Verhindere MIME-Type-Sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # XSS-Schutz
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer-Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Schütze sensible Dateien
+<FilesMatch "^(config\.php|\.env|\.htaccess|composer\.(json|lock))$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Verhindere Directory Listing
+Options -Indexes
+
+# PHP-Einstellungen
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 60
+    php_value max_input_time 60
+</IfModule>
