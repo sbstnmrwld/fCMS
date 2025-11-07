@@ -5,6 +5,36 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
+## [202511072230-dev]
+
+### Hinzugefügt
+- **README-Branding**: fCMS-Logo in README.md für besseres Branding
+  - Responsive Logo mit Dark/Light-Mode-Support (`<picture>` Element)
+  - Logo-Dateien: `docs/img/logo-dunkel.svg` und `docs/img/logo-hell.svg`
+  - Professional presentation with 200px width
+
+### Dokumentation
+- **Docker-First-Approach**: Alle Dokumentationen auf Docker als primäre Entwicklungsoption aktualisiert
+  - `development-setup.md`: Docker Option 1, PHP Built-in Server Option 2
+  - Docker-Befehle und Container-Management dokumentiert
+- **Bootstrap-Klarstellungen**: Bootstrap-Abhängigkeiten korrekt dargestellt
+  - Admin-Bereich: Bootstrap zwingend erforderlich
+  - Themes: Bootstrap optional (Default-Theme als Beispiel)
+  - Eigene CSS-Frameworks (Tailwind, Foundation, etc.) explizit als Alternative erwähnt
+- **Strukturelle Verbesserungen**: Alle Dokumentationen auf aktuellen Projektstand
+  - `theme-development.md`: CSS-Framework-Flexibilität hervorgehoben
+  - `architecture.md`: Frontend-Sektion in Admin/Themes aufgeteilt
+  - `docs/README.md`: Bootstrap-Referenzen entfernt/korrigiert
+  - README.md Struktur bereinigt (doppelte Inhalte entfernt)
+
+### Geändert
+- **README.md Struktur**: Aufgeräumtes Layout mit klarer Hierarchie
+  - Inhaltsverzeichnis mit korrekten Verlinkungen
+  - Hauptmerkmale prominent platziert
+  - Konsistente Badge-Darstellung (Version, PHP, License)
+
+---
+
 ## [202511071820-dev]
 
 ### Behoben

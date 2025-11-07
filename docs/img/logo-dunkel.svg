@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Hintergrund -->
+  <rect width="256" height="256" rx="32" fill="#2D2E32"/>
+
+  <!-- Symbol: Drei gestapelte, leicht versetzte Panels (repräsentieren Module / Ebenen / Brandings) -->
+  <g transform="translate(48,64)">
+    <rect x="24" y="0" width="112" height="36" rx="8" fill="#3FA9F5"/>
+    <rect x="16" y="44" width="120" height="36" rx="8" fill="#56B8F8"/>
+    <rect x="8" y="88" width="128" height="36" rx="8" fill="#7CCBFB"/>
+  </g>
+
+  <!-- dezenter Akzentpunkt (Symbol für Präzision und Detailarbeit) -->
+  <circle cx="204" cy="204" r="8" fill="#3FA9F5"/>
+</svg>
