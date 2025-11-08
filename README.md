@@ -8,7 +8,7 @@
 
 # fCMS - Dateibasiertes Content-Management-System
 
-![Version](https://img.shields.io/badge/version-202511081603--dev-blue.svg)
+![Version](https://img.shields.io/badge/version-202511081732--dev-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 

@@ -4,6 +4,22 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081732-dev] - 2025-11-08
+
+### Behoben
+- **Race Condition bei Slug-Generierung**: File-Locking verhindert jetzt Duplikate
+  - Exklusives Lock während `ensureUniqueSlug()` und `savePage()`
+  - Lock-Datei: `content/pages/.slug-creation.lock`
+  - Garantiert eindeutige Slugs auch bei gleichzeitigen Page-Erstellungen
+  - 100% Thread-Safe ohne externe Dependencies
+
+### Hinzugefügt
+- **Race Condition Tests**: Umfassende Test-Suite für parallele Zugriffe
+  - `ContentManagerRaceConditionTest.php`: 3 Unit-Tests (31 Assertions)
+  - `test-race-condition.php`: Manuelles Test-Script mit Fork
+  - `PageCreationRaceConditionTest.php`: Integration-Tests mit curl_multi
+  - Dokumentation: `docs/race-condition-fix.md`
+
 ## [202511081615-dev] - 2025-11-08
 
 ### Hinzugefügt

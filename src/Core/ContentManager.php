@@ -52,30 +52,54 @@ class ContentManager
         // Validiere den generierten/übergebenen Slug
         $slug = Validator::slug($slug);
 
-        // Stelle sicher, dass Slug eindeutig ist
-        $slug = $this->ensureUniqueSlug($slug);
+        // Kritischer Abschnitt: Slug-Eindeutigkeit prüfen und Datei erstellen
+        // muss atomar sein, um Race Conditions zu vermeiden
+        $lockFile = $this->contentPath . '/.slug-creation.lock';
+        $lockHandle = fopen($lockFile, 'c');
+        
+        if ($lockHandle === false) {
+            throw new StorageException('Konnte Lock-Datei nicht erstellen');
+        }
 
-        $page = [
-            'id' => $this->generateId(),
-            'slug' => $slug,
-            'title' => $validated['title'],
-            'status' => $validated['status'],
-            'sections' => $validated['sections'],
-            'navigation' => [
-                'main' => $validated['nav_main'],
-                'footer' => $validated['nav_footer'],
-                'order' => $validated['nav_order'],
-                'label' => $validated['nav_label'],
-            ],
-            'meta' => [
-                'description' => $validated['meta_description'],
-                'keywords' => $validated['meta_keywords'],
-            ],
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
+        try {
+            // Exklusives Lock für Slug-Generierung und Datei-Erstellung
+            if (!flock($lockHandle, LOCK_EX)) {
+                throw new StorageException('Konnte Lock nicht erwerben');
+            }
 
-        return $this->savePage($slug, $page);
+            // Stelle sicher, dass Slug eindeutig ist (jetzt thread-safe)
+            $slug = $this->ensureUniqueSlug($slug);
+
+            $page = [
+                'id' => $this->generateId(),
+                'slug' => $slug,
+                'title' => $validated['title'],
+                'status' => $validated['status'],
+                'sections' => $validated['sections'],
+                'navigation' => [
+                    'main' => $validated['nav_main'],
+                    'footer' => $validated['nav_footer'],
+                    'order' => $validated['nav_order'],
+                    'label' => $validated['nav_label'],
+                ],
+                'meta' => [
+                    'description' => $validated['meta_description'],
+                    'keywords' => $validated['meta_keywords'],
+                ],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            // Speichere Seite (noch unter Lock)
+            $result = $this->savePage($slug, $page);
+
+            // Lock freigeben
+            flock($lockHandle, LOCK_UN);
+            
+            return $result;
+        } finally {
+            fclose($lockHandle);
+        }
     }
 
     /**

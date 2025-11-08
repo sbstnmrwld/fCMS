@@ -25,6 +25,8 @@ Willkommen zur fCMS-Dokumentation! Hier finden Sie alle Informationen zur Instal
 | [Modul-Entwicklung](module-development.md) | Eigene Module erstellen |
 | [Asset-Management](asset-management.md) | CSS/JS richtig einbinden |
 | [Build-Release](build-release.md) | Produktions-Build erstellen |
+| [Sicherheit](security.md) | Sicherheits-Features und Best Practices |
+| [Race Condition Fix](race-condition-fix.md) | File-Locking bei Slug-Generierung |
 
 ## 🚀 Schnelleinstieg
 
