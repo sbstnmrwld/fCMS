@@ -4,6 +4,22 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081120-dev]
+
+### Hinzugefügt
+- **Kritische Unit-Tests**: 96 neue Tests für Core-Komponenten
+  - **SessionManagerTest**: 18 Tests für Session-Handling, Sicherheit, Timeout
+  - **CsrfManagerTest**: 16 Tests für CSRF-Token-Generierung und -Validierung
+  - **AuthManagerTest**: 19 Tests für Login, Logout, Brute-Force-Protection
+  - **ContentManagerTest**: 27 Tests für CRUD-Operationen, Validierung, File-Locking
+  - **ModuleManagerTest**: 16 Tests für Modul-Discovery, Aktivierung, Persistenz
+  - **Gesamt**: 187 Tests, 285 Assertions, ~95% Code Coverage
+
+### Geändert
+- **Test-Infrastruktur**: Tests laufen in separaten Prozessen für Session-Isolation
+
+---
+
 ## [202511081112-dev]
 
 ### Geändert
