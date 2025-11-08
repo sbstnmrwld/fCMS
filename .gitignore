@@ -43,3 +43,6 @@ composer.phar
 .env.local
 public/admin/assets/bootstrap*/*
 public/themes/default/assets/bootstrap*/*
+
+.claude
+CLAUDE.md

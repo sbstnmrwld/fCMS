@@ -8,8 +8,8 @@
 
 # fCMS - Dateibasiertes Content-Management-System
 
-![Version](https://img.shields.io/badge/version-202511072246--dev-blue.svg)
-![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4.svg)
+![Version](https://img.shields.io/badge/version-202511081430--dev-blue.svg)
+![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 **fCMS** ist ein modernes, dateibasiertes Content-Management-System, das speziell für kleine Organisationen wie Fördervereine entwickelt wurde. Es benötigt keine Datenbank, ist DSGVO-konform und kann auf einfachem Webspace ohne technische Vorkenntnisse betrieben werden.
@@ -953,4 +953,4 @@ fCMS verwendet folgende Open-Source-Projekte:
 
 **Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**
 
-Version 202511072246-dev | [Changelog](CHANGELOG.md)
+Version 202511081430-dev | [Changelog](CHANGELOG.md)

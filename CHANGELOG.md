@@ -4,6 +4,32 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081430-dev]
+
+### Behoben
+- **PageController Create-Funktionalität**: Seiten-Erstellung war nicht funktionsfähig
+  - `renderPageForm()` Methode war unvollständiger Platzhalter (nur Überschrift, keine Formularfelder)
+  - Vollständiges Formular implementiert mit allen Feldern (Titel, Slug, Status, Navigation, SEO)
+  - Block-Editor vollständig integriert (CSS/JS Assets, Editor-Container, Initialisierung)
+  - `edit()` Methode refactored - nutzt jetzt die gemeinsame `renderPageForm()` Methode (DRY-Prinzip)
+  - Code-Duplizierung eliminiert (120+ Zeilen redundanter Form-HTML entfernt)
+- **Code-Qualität**: Unbenutzte Variablen in Exception-Catch-Blöcken mit Unterstrich-Präfix versehen
+
+### Hinzugefügt
+- **CLAUDE.md**: Umfassende Entwickler-Dokumentation für Claude Code
+  - Projekt-Übersicht und Architektur-Beschreibung
+  - Entwicklungs-Kommandos (Tests, Build, Server)
+  - Controller-Architektur und Core-Services
+  - Exception-Handling und Validierungssystem
+  - Block-, Modul- und Theme-System Dokumentation
+  - Testing-Standards und Code-Practices
+  - Häufige Entwicklungsaufgaben
+
+### Geändert
+- **PageController**: Von 437 auf 437 Zeilen bei gleichzeitiger Funktionserweiterung durch Code-Deduplizierung
+
+---
+
 ## [202511081147-dev]
 
 ### Geändert

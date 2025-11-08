@@ -142,127 +142,8 @@ class PageController
             return $response->withStatus(500);
         }
 
-        // Bereite Blocks JSON vor
-        $blocksJson = json_encode($page['sections'] ?? []);
-
-        // Hole verfügbare Block-Typen
-        $availableBlocks = $this->blockRegistry->getAllMetadata();
-        $availableBlocksJson = json_encode($availableBlocks);
-
-        $formContent = '
-        <link rel="stylesheet" href="' . $this->adminAssets->css('block-editor.css') . '">
-        <input type="hidden" id="initial_blocks_data" value=\'' . htmlspecialchars($blocksJson, ENT_QUOTES) . '\'>
-        <input type="hidden" id="available_blocks_data" value=\'' . htmlspecialchars($availableBlocksJson, ENT_QUOTES) . '\'>
-
-        <div class="container-fluid mt-4">
-            <h2><i class="bi bi-pencil-square me-2"></i>Seite bearbeiten: ' . htmlspecialchars($page['title']) . '</h2>
-
-            <form method="POST" action="/admin/pages/update/' . urlencode($slug) . '" class="mt-4" id="page-form">
-                ' . $this->csrf->getTokenField() . '
-
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="mb-3">
-                            <label for="title" class="form-label"><i class="bi bi-type me-1"></i>Titel *</label>
-                            <input type="text" class="form-control" id="title" name="title" value="' . htmlspecialchars($page['title']) . '" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="slug" class="form-label"><i class="bi bi-link-45deg me-1"></i>URL-Slug</label>
-                            <input type="text" class="form-control" id="slug" name="slug" value="' . htmlspecialchars($page['slug']) . '" readonly>
-                            <small class="form-text text-muted">Der Slug kann nicht geändert werden</small>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label"><i class="bi bi-layout-text-window me-1"></i>Inhalt</label>
-                            <div id="block-editor-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <div class="card mb-3">
-                            <div class="card-header"><strong><i class="bi bi-send me-1"></i>Veröffentlichung</strong></div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" id="status" name="status">
-                                        <option value="draft"' . ($page['status'] === 'draft' ? ' selected' : '') . '>Entwurf</option>
-                                        <option value="published"' . ($page['status'] === 'published' ? ' selected' : '') . '>Veröffentlicht</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card mb-3">
-                            <div class="card-header"><strong><i class="bi bi-list-ul me-1"></i>Navigation</strong></div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="nav_label" class="form-label"><i class="bi bi-tag me-1"></i>Menü-Eintrag</label>
-                                    <input type="text" class="form-control" id="nav_label" name="nav_label" value="' . htmlspecialchars($page['navigation']['label'] ?? '') . '" placeholder="Leer lassen um Seitentitel zu verwenden">
-                                    <small class="form-text text-muted">Wird in Navigationsmenüs angezeigt</small>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="nav_main" name="nav_main" value="1"' . ($page['navigation']['main'] ?? false ? ' checked' : '') . '>
-                                    <label class="form-check-label" for="nav_main">
-                                        <i class="bi bi-menu-button-wide me-1"></i>Hauptnavigation
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="nav_footer" name="nav_footer" value="1"' . ($page['navigation']['footer'] ?? false ? ' checked' : '') . '>
-                                    <label class="form-check-label" for="nav_footer">
-                                        <i class="bi bi-menu-down me-1"></i>Footer-Navigation
-                                    </label>
-                                </div>
-                                <div class="mt-3">
-                                    <label for="nav_order" class="form-label"><i class="bi bi-arrow-down-up me-1"></i>Reihenfolge</label>
-                                    <input type="number" class="form-control" id="nav_order" name="nav_order" value="' . ($page['navigation']['order'] ?? 0) . '" min="0">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card mb-3">
-                            <div class="card-header"><strong><i class="bi bi-search me-1"></i>SEO</strong></div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="meta_description" class="form-label"><i class="bi bi-text-paragraph me-1"></i>Meta Description</label>
-                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3">' . htmlspecialchars($page['meta']['description'] ?? '') . '</textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="meta_keywords" class="form-label"><i class="bi bi-tags me-1"></i>Keywords</label>
-                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="' . htmlspecialchars($page['meta']['keywords'] ?? '') . '" placeholder="keyword1, keyword2">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle me-1"></i>Änderungen speichern
-                    </button>
-                    <a href="/admin/pages" class="btn btn-secondary">
-                        <i class="bi bi-x-circle me-1"></i>Abbrechen
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <script src="' . $this->adminAssets->js('block-editor.js') . '"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                blockEditor = new BlockEditor("block-editor-container");
-            });
-        </script>';
-
-        $html = renderAdminTemplate('layout', [
-            'content' => $formContent,
-            'title' => 'Seite bearbeiten',
-            'activeMenu' => 'pages',
-            'adminAssets' => $this->adminAssets,
-            'lang' => $this->lang,
-            'username' => $this->auth->getUsername(),
-            'csrfToken' => $this->csrf->getToken(),
-        ], $this->container);
+        // Nutze die gemeinsame renderPageForm Methode
+        $html = $this->renderPageForm($page);
 
         $response->getBody()->write($html);
         return $response;
@@ -316,11 +197,11 @@ class PageController
             return $response
                 ->withHeader('Location', '/admin/pages')
                 ->withStatus(302);
-        } catch (ValidationException $e) {
+        } catch (ValidationException $_e) {
             return $response->withStatus(400);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException $_e) {
             return $response->withStatus(404);
-        } catch (StorageException $e) {
+        } catch (StorageException $_e) {
             return $response->withStatus(500);
         }
     }
@@ -328,7 +209,7 @@ class PageController
     /**
      * Löscht Seite
      */
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $_request, Response $response, array $args): Response
     {
         $slug = $args['slug'];
 
@@ -337,9 +218,9 @@ class PageController
             return $response
                 ->withHeader('Location', '/admin/pages')
                 ->withStatus(302);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException $_e) {
             return $response->withStatus(404);
-        } catch (StorageException $e) {
+        } catch (StorageException $_e) {
             return $response->withStatus(500);
         }
     }
@@ -417,14 +298,132 @@ class PageController
         $title = $isEdit ? 'Seite bearbeiten' : 'Neue Seite erstellen';
         $action = $isEdit ? '/admin/pages/update/' . urlencode($page['slug']) : '/admin/pages/create';
 
-        // Hier würde die komplette Form kommen - für jetzt vereinfacht
-        $formContent = '<div class="container-fluid mt-4">
-            <h2>' . $title . '</h2>
-            <form method="POST" action="' . $action . '">
+        // Prepare blocks JSON
+        $blocksJson = $isEdit ? json_encode($page['sections'] ?? []) : '[]';
+
+        // Get available block types
+        $availableBlocks = $this->blockRegistry->getAllMetadata();
+        $availableBlocksJson = json_encode($availableBlocks);
+
+        // Form values with defaults
+        $pageTitle = $isEdit ? htmlspecialchars($page['title']) : '';
+        $pageSlug = $isEdit ? htmlspecialchars($page['slug']) : '';
+        $pageStatus = $isEdit ? $page['status'] : 'draft';
+        $navLabel = $isEdit ? htmlspecialchars($page['navigation']['label'] ?? '') : '';
+        $navMain = $isEdit ? ($page['navigation']['main'] ?? false) : false;
+        $navFooter = $isEdit ? ($page['navigation']['footer'] ?? false) : false;
+        $navOrder = $isEdit ? ($page['navigation']['order'] ?? 0) : 0;
+        $metaDescription = $isEdit ? htmlspecialchars($page['meta']['description'] ?? '') : '';
+        $metaKeywords = $isEdit ? htmlspecialchars($page['meta']['keywords'] ?? '') : '';
+
+        $formContent = '
+        <link rel="stylesheet" href="' . $this->adminAssets->css('block-editor.css') . '">
+        <input type="hidden" id="initial_blocks_data" value=\'' . htmlspecialchars($blocksJson, ENT_QUOTES) . '\'>
+        <input type="hidden" id="available_blocks_data" value=\'' . htmlspecialchars($availableBlocksJson, ENT_QUOTES) . '\'>
+
+        <div class="container-fluid mt-4">
+            <h2><i class="bi bi-' . ($isEdit ? 'pencil-square' : 'plus-circle') . ' me-2"></i>' . $title . '</h2>
+
+            <form method="POST" action="' . $action . '" class="mt-4" id="page-form">
                 ' . $this->csrf->getTokenField() . '
-                <!-- Form-Felder hier -->
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="mb-3">
+                            <label for="title" class="form-label"><i class="bi bi-type me-1"></i>Titel *</label>
+                            <input type="text" class="form-control" id="title" name="title" value="' . $pageTitle . '" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="slug" class="form-label"><i class="bi bi-link-45deg me-1"></i>URL-Slug</label>
+                            ' . ($isEdit
+                                ? '<input type="text" class="form-control" id="slug" name="slug" value="' . $pageSlug . '" readonly>
+                                   <small class="form-text text-muted">Der Slug kann nicht geändert werden</small>'
+                                : '<input type="text" class="form-control" id="slug" name="slug" value="' . $pageSlug . '" placeholder="wird-automatisch-generiert">
+                                   <small class="form-text text-muted">Wird automatisch aus dem Titel generiert, wenn leer gelassen</small>'
+                            ) . '
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label"><i class="bi bi-layout-text-window me-1"></i>Inhalt</label>
+                            <div id="block-editor-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card mb-3">
+                            <div class="card-header"><strong><i class="bi bi-send me-1"></i>Veröffentlichung</strong></div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="draft"' . ($pageStatus === 'draft' ? ' selected' : '') . '>Entwurf</option>
+                                        <option value="published"' . ($pageStatus === 'published' ? ' selected' : '') . '>Veröffentlicht</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header"><strong><i class="bi bi-list-ul me-1"></i>Navigation</strong></div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="nav_label" class="form-label"><i class="bi bi-tag me-1"></i>Menü-Eintrag</label>
+                                    <input type="text" class="form-control" id="nav_label" name="nav_label" value="' . $navLabel . '" placeholder="Leer lassen um Seitentitel zu verwenden">
+                                    <small class="form-text text-muted">Wird in Navigationsmenüs angezeigt</small>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="nav_main" name="nav_main" value="1"' . ($navMain ? ' checked' : '') . '>
+                                    <label class="form-check-label" for="nav_main">
+                                        <i class="bi bi-menu-button-wide me-1"></i>Hauptnavigation
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="nav_footer" name="nav_footer" value="1"' . ($navFooter ? ' checked' : '') . '>
+                                    <label class="form-check-label" for="nav_footer">
+                                        <i class="bi bi-menu-down me-1"></i>Footer-Navigation
+                                    </label>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="nav_order" class="form-label"><i class="bi bi-arrow-down-up me-1"></i>Reihenfolge</label>
+                                    <input type="number" class="form-control" id="nav_order" name="nav_order" value="' . $navOrder . '" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header"><strong><i class="bi bi-search me-1"></i>SEO</strong></div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="meta_description" class="form-label"><i class="bi bi-text-paragraph me-1"></i>Meta Description</label>
+                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3">' . $metaDescription . '</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="meta_keywords" class="form-label"><i class="bi bi-tags me-1"></i>Keywords</label>
+                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="' . $metaKeywords . '" placeholder="keyword1, keyword2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>' . ($isEdit ? 'Änderungen speichern' : 'Seite erstellen') . '
+                    </button>
+                    <a href="/admin/pages" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Abbrechen
+                    </a>
+                </div>
             </form>
-        </div>';
+        </div>
+
+        <script src="' . $this->adminAssets->js('block-editor.js') . '"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                blockEditor = new BlockEditor("block-editor-container");
+            });
+        </script>';
 
         return renderAdminTemplate('layout', [
             'content' => $formContent,
