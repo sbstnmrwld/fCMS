@@ -21,6 +21,13 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
   - Login-Template erhält jetzt korrekte Parameter (csrfField, config, lockoutTime)
   - Behebt Warning "Undefined variable $csrfField" in login.php
 
+### Hinzugefügt
+- **Controller-Tests**: Vollständige Test-Abdeckung für neue Controller-Architektur
+  - **AuthControllerTest**: 7 Tests für Login/Logout-Funktionalität (CSRF-Validierung, Success/Failure-Szenarien)
+  - **PageControllerTest**: 12 Tests für CRUD-Operationen (index, create, store, edit, update, delete)
+  - **Test-Bootstrap**: Mock-Funktion für renderAdminTemplate() in Unit-Tests
+  - **Test-Suite**: Erweitert von 286 auf 305 Tests (+19 Tests, +43 Assertions)
+
 ### Behoben
 - Login-Seite zeigt keine PHP-Warnings mehr
 - Edit-Seite rendert vollständiges Formular statt leerer Platzhalter
