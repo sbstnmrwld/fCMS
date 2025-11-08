@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Integration-Test für E-Mail-Benachrichtigungen des FormBuilder
- * 
+ *
  * Testet die E-Mail-Funktionalität durch Prüfung der Mail-Logs
  */
 class FormBuilderEmailTest extends TestCase
@@ -19,7 +19,7 @@ class FormBuilderEmailTest extends TestCase
     {
         parent::setUp();
         $this->mailLogPath = __DIR__ . '/../../logs/mails';
-        
+
         // Stelle sicher dass das Verzeichnis existiert
         if (!is_dir($this->mailLogPath)) {
             mkdir($this->mailLogPath, 0755, true);
@@ -86,7 +86,7 @@ class FormBuilderEmailTest extends TestCase
 
         // Prüfe Response
         $this->assertEquals(200, $httpCode, 'HTTP-Status sollte 200 sein');
-        
+
         $data = json_decode($response, true);
         $this->assertNotNull($data, 'Response sollte valid JSON sein');
         $this->assertTrue($data['success'] ?? false, 'Submission sollte erfolgreich sein');

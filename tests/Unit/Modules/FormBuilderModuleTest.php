@@ -48,10 +48,10 @@ class FormBuilderModuleTest extends TestCase
         // Lade FormBuilderModule
         require_once __DIR__ . '/../../../modules/form-builder/FormBuilderModule.php';
         require_once __DIR__ . '/../../../src/Core/AbstractModule.php';
-        
+
         // Erstelle Modul-Instanz
         $this->module = new \FCMS\Modules\FormBuilderModule($this->tempDir . '/modules/form-builder');
-        
+
         // Setze formsPath via Reflection, um config.php-Pfad zu überschreiben
         $reflection = new \ReflectionClass($this->module);
         $property = $reflection->getProperty('formsPath');
@@ -171,7 +171,7 @@ class FormBuilderModuleTest extends TestCase
         // Prüfe ob die neuesten Submissions behalten wurden
         $files = array_map('basename', $remainingFiles);
         sort($files);
-        
+
         // Die ältesten sollten gelöscht sein
         $this->assertNotContains('sub_001.json', $files, 'Älteste Submission sollte gelöscht sein');
         $this->assertNotContains('sub_002.json', $files, 'Zweitälteste Submission sollte gelöscht sein');
@@ -213,13 +213,13 @@ class FormBuilderModuleTest extends TestCase
     {
         // Test dass Feldnamen automatisch aus Labels generiert werden
         require_once __DIR__ . '/../../../modules/form-builder/FormBlock.php';
-        
+
         // Verwende Reflection um die private renderField Methode zu testen
         $block = new \FCMS\Modules\FormBuilder\FormBlock();
         $reflection = new \ReflectionClass($block);
         $method = $reflection->getMethod('renderField');
         $method->setAccessible(true);
-        
+
         // Test-Feld ohne Name
         $field = [
             'type' => 'text',
@@ -229,9 +229,9 @@ class FormBuilderModuleTest extends TestCase
             'required' => false,
             'options' => [],
         ];
-        
+
         $html = $method->invoke($block, $field);
-        
+
         // Prüfe ob ein name-Attribut generiert wurde
         $this->assertStringContainsString('name="field_mein_test_feld"', $html, 'Feldname sollte aus Label generiert werden');
     }
