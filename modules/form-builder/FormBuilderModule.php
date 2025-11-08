@@ -359,7 +359,7 @@ class FormBuilderModule extends AbstractModule
     /**
      * Versendet E-Mail-Benachrichtigung
      */
-    private function sendEmailNotification(array $formData, array $submissionData, string $submissionId, string $to): bool
+    private function sendEmailNotification(array $formData, array $submissionData, string $submissionId, string $to, ?string $mailLogPath = null): bool
     {
         if (empty($to)) {
             error_log('sendEmailNotification: Keine E-Mail-Adresse angegeben');
@@ -412,7 +412,9 @@ class FormBuilderModule extends AbstractModule
             error_log($logMessage);
 
             // Zusätzlich: E-Mail in Datei speichern (für Development ohne Mail-Server)
-            $mailLogPath = __DIR__ . '/../../logs/mails';
+            if ($mailLogPath === null) {
+                $mailLogPath = __DIR__ . '/../../logs/mails';
+            }
             if (!is_dir($mailLogPath)) {
                 mkdir($mailLogPath, 0755, true);
             }
