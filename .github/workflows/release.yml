@@ -28,7 +28,15 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Building version: $VERSION"
 
-    - name: Install Production Dependencies
+    - name: Install Dependencies (with dev for testing)
+      run: |
+        composer install --optimize-autoloader --no-interaction
+
+    - name: Run Tests
+      run: |
+        ./vendor/bin/phpunit --testdox
+
+    - name: Remove Dev Dependencies
       run: |
         composer install --no-dev --optimize-autoloader --no-interaction
 

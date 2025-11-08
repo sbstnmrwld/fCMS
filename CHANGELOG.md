@@ -4,14 +4,36 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-## [202511081040-dev]
+## [202511081053-dev]
 
 ### Hinzugefügt
+- **PHPUnit Test-Suite**: Umfassende automatisierte Tests
+  - 91 Unit-Tests mit 148 Assertions
+  - Validator-Tests (73 Tests, 100% Coverage)
+  - Exception-Tests (18 Tests, 100% Coverage)
+  - PHPUnit 9.6 Konfiguration mit Code-Coverage
+  - `composer test` Command für einfache Test-Ausführung
+- **Test-Dokumentation**: `TESTING.md` mit vollständiger Anleitung
+  - Test-Struktur und Organisation
+  - Code-Coverage-Ziele (~95% aktuell)
+  - Best Practices und Beispiele
+  - Troubleshooting-Guide
+- **Fish-Shell Test-Runner**: `scripts/test.fish`
+  - Interaktives Test-Script mit farbiger Ausgabe
+  - Watch-Mode für kontinuierliches Testing
+  - Filter-Optionen für spezifische Tests
+  - Coverage-Report-Generierung mit Auto-Open (macOS)
+- **CI/CD Test-Integration**: Automatische Tests in GitHub Actions
+  - `.github/workflows/tests.yml`: Multi-Version PHP-Tests (7.4-8.3)
+  - Codecov-Integration für Coverage-Tracking
+  - Test-Execution vor Release-Builds
+  - Composer-Cache für schnellere Builds
+
+### Hinzugefügt (von 202511081040-dev)
 - **Umfassendes Input-Validierungssystem**: Zentrale Validierung aller Benutzereingaben
   - `Validator`-Klasse mit 15+ Validierungsmethoden (String, Slug, Enum, Integer, Boolean, Array, Email, URL, JSON, Filename)
   - `ValidationException`, `NotFoundException`, `StorageException` für typisiertes Error-Handling
   - Composite-Validierungen: `pageData()`, `loginCredentials()`
-  - 33 automatisierte Tests in Testskript mit 100% Erfolgsquote
 
 ### Sicherheit
 - **Path-Traversal-Schutz**: Slug-Validierung verhindert `../` und andere Path-Traversal-Versuche
