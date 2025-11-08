@@ -21,7 +21,13 @@ use FCMS\Core\{
     LanguageManager,
     ThemeManager,
     ThemeAssetManager,
-    SettingsManager
+    SettingsManager,
+    Validator
+};
+use FCMS\Exceptions\{
+    ValidationException,
+    NotFoundException,
+    StorageException
 };
 use FCMS\Blocks\BlockRegistry;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -192,6 +198,9 @@ $app->get('/login', function (Request $request, Response $response) {
 $app->post('/login', function (Request $request, Response $response) {
     $auth = $this->get(AuthManager::class);
     $csrf = $this->get(CsrfManager::class);
+    $adminAssets = $this->get(AdminAssetManager::class);
+    $lang = $this->get(LanguageManager::class);
+    $config = $this->get('config');
 
     $data = $request->getParsedBody();
 
@@ -203,10 +212,6 @@ $app->post('/login', function (Request $request, Response $response) {
     $lockoutTime = $auth->getLockoutTimeRemaining();
 
     if ($lockoutTime > 0) {
-        $adminAssets = $this->get(AdminAssetManager::class);
-        $lang = $this->get(LanguageManager::class);
-        $config = $this->get('config');
-
         $html = renderAdminTemplate('login', [
             'csrfField' => $csrf->getTokenField(),
             'lockoutTime' => $lockoutTime,
@@ -219,27 +224,38 @@ $app->post('/login', function (Request $request, Response $response) {
         return $response;
     }
 
-    $username = $data['username'] ?? '';
-    $password = $data['password'] ?? '';
+    try {
+        $username = $data['username'] ?? '';
+        $password = $data['password'] ?? '';
 
-    if ($auth->attempt($username, $password)) {
-        return $response->withHeader('Location', '/admin')->withStatus(302);
+        if ($auth->attempt($username, $password)) {
+            return $response->withHeader('Location', '/admin')->withStatus(302);
+        }
+
+        // Login fehlgeschlagen
+        $html = renderAdminTemplate('login', [
+            'csrfField' => $csrf->getTokenField(),
+            'error' => $lang->t('login.error'),
+            'adminAssets' => $adminAssets,
+            'lang' => $lang,
+            'config' => $config,
+        ], $this);
+
+        $response->getBody()->write($html);
+        return $response;
+    } catch (ValidationException $e) {
+        // Validierungsfehler
+        $html = renderAdminTemplate('login', [
+            'csrfField' => $csrf->getTokenField(),
+            'error' => 'Ungültige Eingabe: ' . $e->getMessage(),
+            'adminAssets' => $adminAssets,
+            'lang' => $lang,
+            'config' => $config,
+        ], $this);
+
+        $response->getBody()->write($html);
+        return $response->withStatus(400);
     }
-
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $config = $this->get('config');
-
-    $html = renderAdminTemplate('login', [
-        'csrfField' => $csrf->getTokenField(),
-        'error' => $lang->t('login.error'),
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'config' => $config,
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
 });
 
 // Logout
@@ -563,47 +579,47 @@ $app->post('/pages/create', function (Request $request, Response $response) {
         return $response->withStatus(403);
     }
 
-    // Parse Blocks JSON
-    $sections = [];
-    if (!empty($data['blocks_json'])) {
-        $blocks = json_decode($data['blocks_json'], true);
-        if (is_array($blocks)) {
-            $sections = $blocks;
+    try {
+        // Parse Blocks JSON mit Validierung
+        $sections = [];
+        if (!empty($data['blocks_json'])) {
+            $sections = Validator::json($data['blocks_json']);
         }
-    }
 
-    // Fallback: wenn keine Blocks, aber Content vorhanden
-    if (empty($sections) && !empty($data['content'])) {
-        $sections = [
-            [
-                'type' => 'paragraph',
-                'data' => [
-                    'text' => $data['content']
+        // Fallback: wenn keine Blocks, aber Content vorhanden
+        if (empty($sections) && !empty($data['content'])) {
+            $sections = [
+                [
+                    'type' => 'paragraph',
+                    'data' => [
+                        'text' => $data['content']
+                    ]
                 ]
-            ]
+            ];
+        }
+
+        // Seite erstellen - Validierung erfolgt in ContentManager
+        $pageData = [
+            'title' => $data['title'] ?? 'Neue Seite',
+            'slug' => $data['slug'] ?? '',
+            'status' => $data['status'] ?? 'draft',
+            'sections' => $sections,
+            'nav_main' => $data['nav_main'] ?? false,
+            'nav_footer' => $data['nav_footer'] ?? false,
+            'nav_order' => $data['nav_order'] ?? 0,
+            'nav_label' => $data['nav_label'] ?? '',
+            'meta_description' => $data['meta_description'] ?? '',
+            'meta_keywords' => $data['meta_keywords'] ?? '',
         ];
-    }
 
-    // Seite erstellen
-    $pageData = [
-        'title' => $data['title'] ?? 'Neue Seite',
-        'slug' => $data['slug'] ?? '',
-        'status' => $data['status'] ?? 'draft',
-        'sections' => $sections,
-        'nav_main' => isset($data['nav_main']),
-        'nav_footer' => isset($data['nav_footer']),
-        'nav_order' => (int)($data['nav_order'] ?? 0),
-        'nav_label' => trim($data['nav_label'] ?? ''),
-        'meta_description' => $data['meta_description'] ?? '',
-        'meta_keywords' => $data['meta_keywords'] ?? '',
-    ];
+        $contentManager->createPage($pageData);
 
-    $success = $contentManager->createPage($pageData);
-
-    if ($success) {
         return $response->withHeader('Location', '/admin/pages')->withStatus(302);
-    } else {
-        $response->getBody()->write('Fehler beim Erstellen der Seite');
+    } catch (ValidationException $e) {
+        $response->getBody()->write('Validierungsfehler: ' . $e->getMessage());
+        return $response->withStatus(400);
+    } catch (StorageException $e) {
+        $response->getBody()->write('Speicherfehler: ' . $e->getMessage());
         return $response->withStatus(500);
     }
 })->add($authMiddleware);
@@ -617,11 +633,20 @@ $app->get('/pages/edit/{slug}', function (Request $request, Response $response, 
     $csrf = $this->get(CsrfManager::class);
 
     $slug = $args['slug'];
-    $page = $contentManager->getPage($slug);
 
-    if (!$page) {
-        $response->getBody()->write('Seite nicht gefunden');
-        return $response->withStatus(404);
+    try {
+        $page = $contentManager->getPage($slug);
+
+        if (!$page) {
+            $response->getBody()->write('Seite nicht gefunden');
+            return $response->withStatus(404);
+        }
+    } catch (ValidationException $e) {
+        $response->getBody()->write('Ungültiger Slug: ' . $e->getMessage());
+        return $response->withStatus(400);
+    } catch (StorageException $e) {
+        $response->getBody()->write('Fehler beim Laden: ' . $e->getMessage());
+        return $response->withStatus(500);
     }
 
     // Bereite Blocks JSON vor
@@ -766,46 +791,49 @@ $app->post('/pages/update/{slug}', function (Request $request, Response $respons
         return $response->withStatus(403);
     }
 
-    // Parse Blocks JSON
-    $sections = [];
-    if (!empty($data['blocks_json'])) {
-        $blocks = json_decode($data['blocks_json'], true);
-        if (is_array($blocks)) {
-            $sections = $blocks;
+    try {
+        // Parse Blocks JSON mit Validierung
+        $sections = [];
+        if (!empty($data['blocks_json'])) {
+            $sections = Validator::json($data['blocks_json']);
         }
-    }
 
-    // Fallback: wenn keine Blocks, aber Content vorhanden
-    if (empty($sections) && !empty($data['content'])) {
-        $sections = [
-            [
-                'type' => 'paragraph',
-                'data' => [
-                    'text' => $data['content']
+        // Fallback: wenn keine Blocks, aber Content vorhanden
+        if (empty($sections) && !empty($data['content'])) {
+            $sections = [
+                [
+                    'type' => 'paragraph',
+                    'data' => [
+                        'text' => $data['content']
+                    ]
                 ]
-            ]
+            ];
+        }
+
+        // Seite aktualisieren - Validierung erfolgt in ContentManager
+        $pageData = [
+            'title' => $data['title'] ?? 'Neue Seite',
+            'status' => $data['status'] ?? 'draft',
+            'sections' => $sections,
+            'nav_main' => $data['nav_main'] ?? false,
+            'nav_footer' => $data['nav_footer'] ?? false,
+            'nav_order' => $data['nav_order'] ?? 0,
+            'nav_label' => $data['nav_label'] ?? '',
+            'meta_description' => $data['meta_description'] ?? '',
+            'meta_keywords' => $data['meta_keywords'] ?? '',
         ];
-    }
 
-    // Seite aktualisieren
-    $pageData = [
-        'title' => $data['title'] ?? 'Neue Seite',
-        'status' => $data['status'] ?? 'draft',
-        'sections' => $sections,
-        'nav_main' => isset($data['nav_main']),
-        'nav_footer' => isset($data['nav_footer']),
-        'nav_order' => (int)($data['nav_order'] ?? 0),
-        'nav_label' => trim($data['nav_label'] ?? ''),
-        'meta_description' => $data['meta_description'] ?? '',
-        'meta_keywords' => $data['meta_keywords'] ?? '',
-    ];
+        $contentManager->updatePage($slug, $pageData);
 
-    $success = $contentManager->updatePage($slug, $pageData);
-
-    if ($success) {
         return $response->withHeader('Location', '/admin/pages')->withStatus(302);
-    } else {
-        $response->getBody()->write('Fehler beim Aktualisieren der Seite');
+    } catch (ValidationException $e) {
+        $response->getBody()->write('Validierungsfehler: ' . $e->getMessage());
+        return $response->withStatus(400);
+    } catch (NotFoundException $e) {
+        $response->getBody()->write('Seite nicht gefunden: ' . $e->getMessage());
+        return $response->withStatus(404);
+    } catch (StorageException $e) {
+        $response->getBody()->write('Speicherfehler: ' . $e->getMessage());
         return $response->withStatus(500);
     }
 })->add($authMiddleware);
@@ -815,12 +843,19 @@ $app->get('/pages/delete/{slug}', function (Request $request, Response $response
     $contentManager = $this->get(ContentManager::class);
 
     $slug = $args['slug'];
-    $success = $contentManager->deletePage($slug);
 
-    if ($success) {
+    try {
+        $contentManager->deletePage($slug);
+
         return $response->withHeader('Location', '/admin/pages')->withStatus(302);
-    } else {
-        $response->getBody()->write('Fehler beim Löschen der Seite');
+    } catch (ValidationException $e) {
+        $response->getBody()->write('Ungültiger Slug: ' . $e->getMessage());
+        return $response->withStatus(400);
+    } catch (NotFoundException $e) {
+        $response->getBody()->write('Seite nicht gefunden: ' . $e->getMessage());
+        return $response->withStatus(404);
+    } catch (StorageException $e) {
+        $response->getBody()->write('Fehler beim Löschen: ' . $e->getMessage());
         return $response->withStatus(500);
     }
 })->add($authMiddleware);

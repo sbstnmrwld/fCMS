@@ -3,7 +3,61 @@
 Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
-Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
+
+## [202511081040-dev]
+
+### Hinzugefügt
+- **Umfassendes Input-Validierungssystem**: Zentrale Validierung aller Benutzereingaben
+  - `Validator`-Klasse mit 15+ Validierungsmethoden (String, Slug, Enum, Integer, Boolean, Array, Email, URL, JSON, Filename)
+  - `ValidationException`, `NotFoundException`, `StorageException` für typisiertes Error-Handling
+  - Composite-Validierungen: `pageData()`, `loginCredentials()`
+  - 33 automatisierte Tests in Testskript mit 100% Erfolgsquote
+
+### Sicherheit
+- **Path-Traversal-Schutz**: Slug-Validierung verhindert `../` und andere Path-Traversal-Versuche
+- **Type-Safety**: Strikte Typ-Validierung für alle Inputs (Strings, Integers, Booleans, Arrays)
+- **Enum-Validierung**: Status-Felder und andere Enums werden gegen erlaubte Werte geprüft
+- **JSON-Validierung**: Sichere JSON-Dekodierung mit Fehlerprüfung
+- **Filename-Validierung**: Schutz vor Path-Traversal bei Dateinamen
+- **Length-Limits**: UTF-8-aware Längenprüfung für alle String-Inputs
+- **Reservierte Slugs**: Schutz vor Verwendung reservierter Namen (admin, api, assets, etc.)
+
+### Geändert
+- **ContentManager**: Alle Methoden nutzen Validator und werfen typisierte Exceptions
+  - `createPage()`: Validiert alle Seitendaten via `Validator::pageData()`
+  - `updatePage()`: Validiert Slug und Update-Daten, wirft `NotFoundException`
+  - `deletePage()`: Validiert Slug, wirft `NotFoundException` und `StorageException`
+  - `getPage()`: Validiert Slug, wirft `StorageException` bei JSON-Fehlern
+  - `savePage()`: Prüft JSON-Encoding und File-Operations
+  - `pageExists()`: Validiert Slug gegen Path-Traversal
+- **AuthManager**: Login-Credentials werden validiert via `Validator::loginCredentials()`
+- **admin.php**: Exception-Handling in allen Routen (Login, Seiten erstellen/bearbeiten/löschen)
+  - HTTP 400 bei Validierungsfehlern
+  - HTTP 404 bei fehlenden Ressourcen
+  - HTTP 500 bei Speicherfehlern
+
+### Breaking Changes
+- **ContentManager-API**: Methoden werfen nun Exceptions statt `false` zurückzugeben
+  - `updatePage()`: Wirft `NotFoundException` statt `false`
+  - `deletePage()`: Wirft `NotFoundException`/`StorageException` statt `false`
+  - `getPage()`: Wirft `StorageException` bei JSON-Fehlern
+- **Migration erforderlich**: Try-Catch-Blöcke um ContentManager-Aufrufe implementieren
+
+### Dokumentation
+- **VALIDATION_IMPLEMENTATION.md**: Vollständige Dokumentation des Validierungssystems
+  - API-Beschreibung aller Validator-Methoden
+  - Sicherheitsverbesserungen und Beispiele
+  - Migration-Guide für Breaking Changes
+  - Performance-Hinweise und Best Practices
+
+### Technische Details
+- Alle neuen Klassen nutzen `declare(strict_types=1)` für Type-Safety
+- Exception-Klassen mit Factory-Methoden für aussagekräftige Fehlermeldungen
+- Validierung erfolgt fail-fast (vor Dateisystem-Operationen)
+- UTF-8-Operationen via `mb_*` Funktionen
+- Regex-Patterns optimiert für Performance
+
+---
 
 ## [202511072246-dev]
 

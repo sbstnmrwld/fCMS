@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FCMS\Core;
+
+use FCMS\Exceptions\ValidationException;
 
 /**
  * Authentifizierungs-Manager
@@ -33,9 +37,23 @@ class AuthManager
 
     /**
      * Login-Versuch
+     *
+     * @param string $username Der Benutzername
+     * @param string $password Das Passwort
+     * @return bool True bei erfolgreichem Login
+     * @throws ValidationException Bei ungültigen Credentials
      */
     public function attempt(string $username, string $password): bool
     {
+        // Validiere Login-Daten
+        $validated = Validator::loginCredentials([
+            'username' => $username,
+            'password' => $password
+        ]);
+
+        $username = $validated['username'];
+        $password = $validated['password'];
+
         // Prüfe Login-Sperre
         if ($this->isLocked()) {
             return false;
