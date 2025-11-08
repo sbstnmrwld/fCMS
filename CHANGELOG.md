@@ -4,6 +4,23 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081140-dev]
+
+### Hinzugefügt
+- **Vollständige Test-Suite**: 63 neue Tests für verbleibende Komponenten
+  - **ThemeAssetManagerTest**: 15 Tests für Asset-URLs, Cache-Busting, Theme-Switching
+  - **AdminAssetManagerTest**: 13 Tests für Admin-Assets mit Cache-Busting
+  - **BlockRegistryTest**: 13 Tests für Block-Registry, Rendering, Discovery
+  - **AbstractBlockTest**: 8 Tests für Block-Helper-Methoden, Validation, Escaping
+  - **AbstractModuleTest**: 14 Tests für Modul-Base-Class, Config-Loading
+  - **Gesamt**: 286 Tests, 412 Assertions
+
+### Geändert
+- **Test-Coverage**: Von 223 auf 286 Tests erweitert (+28%)
+- **Vollständigkeit**: Alle Core-, Block- und Asset-Manager-Klassen getestet
+
+---
+
 ## [202511081130-dev]
 
 ### Hinzugefügt
