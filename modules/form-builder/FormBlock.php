@@ -252,7 +252,7 @@ class FormBlock extends AbstractBlock implements BlockInterface
 
         // Fallback: Wenn kein Name vorhanden, generiere einen aus dem Label
         if (empty($name)) {
-            $name = !empty($label) 
+            $name = !empty($label)
                 ? 'field_' . preg_replace('/[^a-z0-9_]/', '_', strtolower($label))
                 : 'field_' . uniqid();
         }

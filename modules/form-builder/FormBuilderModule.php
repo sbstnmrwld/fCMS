@@ -54,7 +54,7 @@ class FormBuilderModule extends AbstractModule
 
         // Registriere API-Endpunkt für verfügbare Formulare
         $this->registerApiRoutes($app, $container);
-        
+
         // Bereinige alte Logs (mit 10% Wahrscheinlichkeit, um Performance zu schonen)
         if (rand(1, 10) === 1) {
             $this->cleanupAllLogs($config);
@@ -71,7 +71,7 @@ class FormBuilderModule extends AbstractModule
         if (is_dir($logsPath)) {
             $this->cleanupOldLogs($logsPath, 100);
         }
-        
+
         // Bereinige Mail-Logs
         $mailLogsPath = $logsPath . '/mails';
         if (is_dir($mailLogsPath)) {
@@ -171,7 +171,7 @@ class FormBuilderModule extends AbstractModule
     public function registerPublicRoutes(object $app, object $container): void
     {
         $self = $this;
-        
+
         // Formular-Submission Handler
         $app->post('/form/submit/{id}', function (Request $request, Response $response, array $args) use ($container, $self) {
             return $self->handleSubmission($request, $response, $container, $args['id']);
@@ -233,7 +233,7 @@ class FormBuilderModule extends AbstractModule
             // E-Mail versenden (falls konfiguriert)
             $emailEnabled = $formData['settings']['email_notification'] ?? $formData['email_notification'] ?? false;
             $notificationEmail = $formData['settings']['notification_email'] ?? $formData['email_notification'] ?? null;
-            
+
             if ($emailEnabled && !empty($notificationEmail)) {
                 $this->sendEmailNotification($formData, $postData, $submissionId, $notificationEmail);
             }
@@ -339,7 +339,7 @@ class FormBuilderModule extends AbstractModule
     private function cleanupOldSubmissions(string $submissionsDir, int $keepCount = 100): void
     {
         $files = glob($submissionsDir . '/*.json');
-        
+
         if (count($files) <= $keepCount) {
             return;
         }
@@ -399,7 +399,7 @@ class FormBuilderModule extends AbstractModule
         // Versuche E-Mail zu senden
         try {
             $result = mail($to, $subject, $body, $headerString);
-            
+
             // Log für Debugging (auch wenn mail() TRUE zurückgibt, heißt das nicht, dass die Mail ankommt)
             $logMessage = sprintf(
                 "[%s] Form Notification Email %s\nTo: %s\nSubject: %s\n%s\n",
@@ -410,13 +410,13 @@ class FormBuilderModule extends AbstractModule
                 str_repeat('-', 80)
             );
             error_log($logMessage);
-            
+
             // Zusätzlich: E-Mail in Datei speichern (für Development ohne Mail-Server)
             $mailLogPath = __DIR__ . '/../../logs/mails';
             if (!is_dir($mailLogPath)) {
                 mkdir($mailLogPath, 0755, true);
             }
-            
+
             $mailLogFile = $mailLogPath . '/mail-' . date('Y-m-d') . '.log';
             $fullMailLog = sprintf(
                 "=== E-Mail gesendet um %s ===\nAn: %s\nBetreff: %s\n\n%s\n\n%s\n\n",
@@ -427,10 +427,10 @@ class FormBuilderModule extends AbstractModule
                 str_repeat('=', 80)
             );
             file_put_contents($mailLogFile, $fullMailLog, FILE_APPEND);
-            
+
             // Alte Mail-Logs bereinigen (nur die letzten 100 behalten)
             $this->cleanupOldLogs($mailLogPath, 100);
-            
+
             return $result;
         } catch (\Exception $e) {
             error_log('Fehler beim E-Mail-Versand: ' . $e->getMessage());
@@ -444,7 +444,7 @@ class FormBuilderModule extends AbstractModule
     private function cleanupOldLogs(string $logPath, int $keepCount = 100): void
     {
         $files = glob($logPath . '/*.log');
-        
+
         if (count($files) <= $keepCount) {
             return;
         }

@@ -106,25 +106,25 @@ foreach ($activeModules as $module) {
 $app->get('/modules/{moduleName}/assets/{path:.*}', function (Request $request, Response $response, array $args) {
     $moduleName = $args['moduleName'];
     $path = $args['path'];
-    
+
     $config = $this->get('config');
     $modulesPath = $config['paths']['modules'];
     $filePath = $modulesPath . '/' . $moduleName . '/assets/' . $path;
-    
+
     // Sicherheitscheck: Verhindere Directory Traversal
     $realPath = realpath($filePath);
     $realModulesPath = realpath($modulesPath);
-    
+
     if (!$realPath || !$realModulesPath || strpos($realPath, $realModulesPath) !== 0) {
         $response->getBody()->write('403 - Zugriff verweigert');
         return $response->withStatus(403);
     }
-    
+
     if (!file_exists($filePath) || !is_file($filePath)) {
         $response->getBody()->write('404 - Asset nicht gefunden');
         return $response->withStatus(404);
     }
-    
+
     // Content-Type ermitteln
     $extension = pathinfo($filePath, PATHINFO_EXTENSION);
     $contentTypes = [
@@ -140,9 +140,9 @@ $app->get('/modules/{moduleName}/assets/{path:.*}', function (Request $request, 
         'ttf' => 'font/ttf',
         'eot' => 'application/vnd.ms-fontobject',
     ];
-    
+
     $contentType = $contentTypes[$extension] ?? 'application/octet-stream';
-    
+
     $response->getBody()->write(file_get_contents($filePath));
     return $response->withHeader('Content-Type', $contentType);
 });
