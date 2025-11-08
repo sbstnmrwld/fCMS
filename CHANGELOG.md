@@ -4,6 +4,16 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081104-dev]
+
+### Geändert
+- **GitHub Actions Workflows**: Aktualisierung auf neueste Action-Versionen
+  - `actions/upload-artifact@v3` → `@v4` (v3 deprecated)
+  - `actions/cache@v3` → `@v4`
+  - Verbesserte Performance und langfristige Unterstützung
+
+---
+
 ## [202511081053-dev]
 
 ### Hinzugefügt
