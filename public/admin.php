@@ -175,7 +175,17 @@ function renderAdminTemplate(string $template, array $data, $container): string
 // ============================================================================
 
 // Register Controllers in DI Container
-use FCMS\Controllers\{AuthController, PageController};
+use FCMS\Controllers\{
+    AuthController,
+    PageController,
+    DashboardController,
+    SettingsController,
+    ModuleController,
+    MediaController,
+    NavigationController,
+    ThemeController,
+    BlockController
+};
 
 $container->set(AuthController::class, function ($c) {
     return new AuthController($c);
@@ -183,6 +193,34 @@ $container->set(AuthController::class, function ($c) {
 
 $container->set(PageController::class, function ($c) {
     return new PageController($c);
+});
+
+$container->set(DashboardController::class, function ($c) {
+    return new DashboardController($c);
+});
+
+$container->set(SettingsController::class, function ($c) {
+    return new SettingsController($c);
+});
+
+$container->set(ModuleController::class, function ($c) {
+    return new ModuleController($c);
+});
+
+$container->set(MediaController::class, function ($c) {
+    return new MediaController($c);
+});
+
+$container->set(NavigationController::class, function ($c) {
+    return new NavigationController($c);
+});
+
+$container->set(ThemeController::class, function ($c) {
+    return new ThemeController($c);
+});
+
+$container->set(BlockController::class, function ($c) {
+    return new BlockController($c);
 });
 
 // ============================================================================
@@ -206,88 +244,12 @@ $authMiddleware = function (Request $request, $handler) {
 };
 
 // Dashboard (Root-Route im /admin Bereich) - sowohl mit als auch ohne trailing slash
-$dashboardHandler = function (Request $request, Response $response) {
-    $contentManager = $this->get(ContentManager::class);
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
+// ============================================================================
+// DASHBOARD ROUTES (via DashboardController)
+// ============================================================================
 
-    $allPages = $contentManager->getAllPages();
-    $publishedPages = $contentManager->getPublishedPages();
-
-    $dashboardContent = '<div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-file-earmark-text fs-1 text-primary me-3"></i>
-                        <div>
-                            <h5 class="card-title mb-0">Seiten</h5>
-                            <p class="dashboard-stat mb-0">' . count($allPages) . '</p>
-                        </div>
-                    </div>
-                    <p class="text-muted">Gesamt</p>
-                    <a href="/admin/pages" class="btn btn-primary btn-sm">
-                        <i class="bi bi-arrow-right me-1"></i>Verwalten
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-check-circle fs-1 text-success me-3"></i>
-                        <div>
-                            <h5 class="card-title mb-0">Veröffentlicht</h5>
-                            <p class="dashboard-stat mb-0">' . count($publishedPages) . '</p>
-                        </div>
-                    </div>
-                    <p class="text-muted">Live-Seiten</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-pencil-square fs-1 text-warning me-3"></i>
-                        <div>
-                            <h5 class="card-title mb-0">Entwürfe</h5>
-                            <p class="dashboard-stat mb-0">' . (count($allPages) - count($publishedPages)) . '</p>
-                        </div>
-                    </div>
-                    <p class="text-muted">Nicht veröffentlicht</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <h3><i class="bi bi-house-door me-2"></i>Willkommen im fCMS Admin-Bereich</h3>
-            <p>Verwalten Sie hier Ihre Website-Inhalte, Navigation und Einstellungen.</p>
-        </div>
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $dashboardContent,
-        'title' => $lang->t('admin.dashboard'),
-        'activeMenu' => 'dashboard',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-};
-
-// Registriere Dashboard für beide Pfade (mit und ohne trailing slash)
-$app->get('', $dashboardHandler)->add($authMiddleware);
-$app->get('/', $dashboardHandler)->add($authMiddleware);
+$app->get('', [DashboardController::class, 'index'])->add($authMiddleware);
+$app->get('/', [DashboardController::class, 'index'])->add($authMiddleware);
 
 // ============================================================================
 // PAGE ROUTES (via PageController)
@@ -300,751 +262,44 @@ $app->get('/pages/edit/{slug}', [PageController::class, 'edit'])->add($authMiddl
 $app->post('/pages/update/{slug}', [PageController::class, 'update'])->add($authMiddleware);
 $app->get('/pages/delete/{slug}', [PageController::class, 'delete'])->add($authMiddleware);
 
-// Media-Verwaltung (Platzhalter)
-$app->get('/media', function (Request $request, Response $response) {
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
-
-    $placeholderContent = '<div class="container mt-4">
-        <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading">🚧 In Entwicklung</h4>
-            <p>Die Sektion <strong>Medien</strong> ist aktuell noch nicht implementiert.</p>
-            <hr>
-            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
-        </div>
-        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $placeholderContent,
-        'title' => 'Medien',
-        'activeMenu' => 'media',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
-
 // ============================================================================
-// NAVIGATION VERWALTUNG
+// MEDIA ROUTES (via MediaController)
 // ============================================================================
 
-// Navigation-Übersicht
-$app->get('/navigation', function (Request $request, Response $response) {
-    $contentManager = $this->get(ContentManager::class);
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
-
-    $allPages = $contentManager->getAllPages();
-    $mainNavPages = $contentManager->getNavigationPages('main');
-    $footerNavPages = $contentManager->getNavigationPages('footer');
-
-    // Hauptnavigation Tabelle
-    $mainNavTable = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-menu-button-wide me-2"></i>Hauptnavigation</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-grip-vertical me-1"></i>Reihenfolge</th>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-tag me-1"></i>Menü-Label</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-    if (empty($mainNavPages)) {
-        $mainNavTable .= '<tr><td colspan="6" class="text-center text-muted">Keine Seiten in der Hauptnavigation</td></tr>';
-    } else {
-        foreach ($mainNavPages as $page) {
-            $statusBadge = $page['status'] === 'published'
-                ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
-
-            $label = ($page['navigation']['label'] ?? '') ?: $page['title'];
-
-            $mainNavTable .= '<tr>
-                <td><strong>' . ($page['navigation']['order'] ?? 0) . '</strong></td>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td>' . htmlspecialchars($label) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
-                    <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
-                    </a>
-                </td>
-            </tr>';
-        }
-    }
-
-    $mainNavTable .= '</tbody></table>
-            </div>
-        </div>
-    </div>';
-
-    // Footer Navigation Tabelle
-    $footerNavTable = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-menu-down me-2"></i>Footer-Navigation</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-grip-vertical me-1"></i>Reihenfolge</th>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-tag me-1"></i>Menü-Label</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-    if (empty($footerNavPages)) {
-        $footerNavTable .= '<tr><td colspan="6" class="text-center text-muted">Keine Seiten in der Footer-Navigation</td></tr>';
-    } else {
-        foreach ($footerNavPages as $page) {
-            $statusBadge = $page['status'] === 'published'
-                ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
-
-            $label = ($page['navigation']['label'] ?? '') ?: $page['title'];
-
-            $footerNavTable .= '<tr>
-                <td><strong>' . ($page['navigation']['order'] ?? 0) . '</strong></td>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td>' . htmlspecialchars($label) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
-                    <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
-                    </a>
-                </td>
-            </tr>';
-        }
-    }
-
-    $footerNavTable .= '</tbody></table>
-            </div>
-        </div>
-    </div>';
-
-    // Verfügbare Seiten (nicht in Navigation)
-    $availablePages = array_filter($allPages, function($page) {
-        return !($page['navigation']['main'] ?? false) && !($page['navigation']['footer'] ?? false);
-    });
-
-    $availablePagesCard = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-files me-2"></i>Verfügbare Seiten (nicht in Navigation)</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-    if (empty($availablePages)) {
-        $availablePagesCard .= '<tr><td colspan="4" class="text-center text-muted">Alle Seiten sind bereits einer Navigation zugeordnet</td></tr>';
-    } else {
-        foreach ($availablePages as $page) {
-            $statusBadge = $page['status'] === 'published'
-                ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
-
-            $availablePagesCard .= '<tr>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
-                    <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
-                    </a>
-                </td>
-            </tr>';
-        }
-    }
-
-    $availablePagesCard .= '</tbody></table>
-            </div>
-        </div>
-    </div>';
-
-    $navigationContent = '<div class="container-fluid mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-list-ul me-2"></i>Navigation verwalten</h2>
-            <a href="/admin/pages/new" class="btn btn-success">
-                <i class="bi bi-plus-circle me-1"></i>Neue Seite erstellen
-            </a>
-        </div>
-
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Hinweis:</strong> Um Seiten zur Navigation hinzuzufügen oder die Reihenfolge zu ändern,
-            bearbeiten Sie die entsprechende Seite und passen Sie die Navigationseinstellungen an.
-        </div>
-
-        ' . $mainNavTable . '
-        ' . $footerNavTable . '
-        ' . $availablePagesCard . '
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $navigationContent,
-        'title' => 'Navigation',
-        'activeMenu' => 'navigation',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
-
-// Theme-Einstellungen (Platzhalter)
-$app->get('/themes', function (Request $request, Response $response) {
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
-
-    $placeholderContent = '<div class="container mt-4">
-        <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading">🚧 In Entwicklung</h4>
-            <p>Die Sektion <strong>Themes</strong> ist aktuell noch nicht implementiert.</p>
-            <hr>
-            <p class="mb-0">Diese Funktion wird in einer zukünftigen Version verfügbar sein.</p>
-        </div>
-        <a href="/admin" class="btn btn-primary">← Zurück zum Dashboard</a>
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $placeholderContent,
-        'title' => 'Themes',
-        'activeMenu' => 'themes',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
+$app->get('/media', [MediaController::class, 'index'])->add($authMiddleware);
 
 // ============================================================================
-// SYSTEM-EINSTELLUNGEN
+// NAVIGATION ROUTES (via NavigationController)
 // ============================================================================
 
-// Einstellungen anzeigen
-$app->get('/settings', function (Request $request, Response $response) {
-    $settingsManager = $this->get(SettingsManager::class);
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
-
-    $settings = $settingsManager->all();
-
-    $settingsContent = '
-    <div class="container-fluid mt-4">
-        <h2><i class="bi bi-gear me-2"></i>System-Einstellungen</h2>
-
-        <form method="POST" action="/admin/settings/update" class="mt-4">
-            ' . $csrf->getTokenField() . '
-
-            <div class="row">
-                <div class="col-lg-8">
-                    <!-- Website-Grundeinstellungen -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-globe me-2"></i>Website-Grundeinstellungen</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="site_name" class="form-label">
-                                    <i class="bi bi-tag me-1"></i>Website-Name
-                                </label>
-                                <input type="text" class="form-control" id="site_name" name="site_name"
-                                       value="' . htmlspecialchars($settings['site']['name'] ?? '') . '" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="site_tagline" class="form-label">
-                                    <i class="bi bi-chat-quote me-1"></i>Slogan / Tagline
-                                </label>
-                                <input type="text" class="form-control" id="site_tagline" name="site_tagline"
-                                       value="' . htmlspecialchars($settings['site']['tagline'] ?? '') . '"
-                                       placeholder="Ein kurzer Slogan für Ihre Website">
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="site_language" class="form-label">
-                                        <i class="bi bi-translate me-1"></i>Sprache
-                                    </label>
-                                    <select class="form-select" id="site_language" name="site_language">
-                                        <option value="de"' . (($settings['site']['language'] ?? 'de') === 'de' ? ' selected' : '') . '>Deutsch</option>
-                                        <option value="en"' . (($settings['site']['language'] ?? 'de') === 'en' ? ' selected' : '') . '>English</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="site_timezone" class="form-label">
-                                        <i class="bi bi-clock me-1"></i>Zeitzone
-                                    </label>
-                                    <select class="form-select" id="site_timezone" name="site_timezone">
-                                        <option value="Europe/Berlin"' . (($settings['site']['timezone'] ?? 'Europe/Berlin') === 'Europe/Berlin' ? ' selected' : '') . '>Europe/Berlin</option>
-                                        <option value="Europe/London"' . (($settings['site']['timezone'] ?? 'Europe/Berlin') === 'Europe/London' ? ' selected' : '') . '>Europe/London</option>
-                                        <option value="America/New_York"' . (($settings['site']['timezone'] ?? 'Europe/Berlin') === 'America/New_York' ? ' selected' : '') . '>America/New_York</option>
-                                        <option value="UTC"' . (($settings['site']['timezone'] ?? 'Europe/Berlin') === 'UTC' ? ' selected' : '') . '>UTC</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SEO-Einstellungen -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-search me-2"></i>SEO-Einstellungen</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="seo_description" class="form-label">
-                                    <i class="bi bi-text-paragraph me-1"></i>Meta Description
-                                </label>
-                                <textarea class="form-control" id="seo_description" name="seo_description" rows="3"
-                                          placeholder="Kurze Beschreibung Ihrer Website für Suchmaschinen">'
-                                          . htmlspecialchars($settings['seo']['meta_description'] ?? '') . '</textarea>
-                                <small class="form-text text-muted">Empfohlene Länge: 150-160 Zeichen</small>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="seo_keywords" class="form-label">
-                                    <i class="bi bi-tags me-1"></i>Meta Keywords
-                                </label>
-                                <input type="text" class="form-control" id="seo_keywords" name="seo_keywords"
-                                       value="' . htmlspecialchars($settings['seo']['meta_keywords'] ?? '') . '"
-                                       placeholder="keyword1, keyword2, keyword3">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="seo_robots" class="form-label">
-                                    <i class="bi bi-robot me-1"></i>Robots Meta Tag
-                                </label>
-                                <select class="form-select" id="seo_robots" name="seo_robots">
-                                    <option value="index, follow"' . (($settings['seo']['robots'] ?? 'index, follow') === 'index, follow' ? ' selected' : '') . '>Index, Follow (Standard)</option>
-                                    <option value="noindex, nofollow"' . (($settings['seo']['robots'] ?? 'index, follow') === 'noindex, nofollow' ? ' selected' : '') . '>NoIndex, NoFollow</option>
-                                    <option value="index, nofollow"' . (($settings['seo']['robots'] ?? 'index, follow') === 'index, nofollow' ? ' selected' : '') . '>Index, NoFollow</option>
-                                    <option value="noindex, follow"' . (($settings['seo']['robots'] ?? 'index, follow') === 'noindex, follow' ? ' selected' : '') . '>NoIndex, Follow</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <!-- Theme-Einstellungen -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-palette me-2"></i>Theme</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="theme_active" class="form-label">Aktives Theme</label>
-                                <select class="form-select" id="theme_active" name="theme_active">
-                                    <option value="default"' . (($settings['theme']['active'] ?? 'default') === 'default' ? ' selected' : '') . '>Default</option>
-                                </select>
-                                <small class="form-text text-muted">Weitere Themes können im Themes-Verzeichnis hinzugefügt werden</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Wartungsmodus -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Wartungsmodus</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="maintenance_enabled"
-                                       name="maintenance_enabled" value="1"' .
-                                       (($settings['maintenance']['enabled'] ?? false) ? ' checked' : '') . '>
-                                <label class="form-check-label" for="maintenance_enabled">
-                                    Wartungsmodus aktivieren
-                                </label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="maintenance_message" class="form-label">Wartungsnachricht</label>
-                                <textarea class="form-control" id="maintenance_message" name="maintenance_message" rows="3">'
-                                          . htmlspecialchars($settings['maintenance']['message'] ?? 'Die Website befindet sich derzeit im Wartungsmodus.') . '</textarea>
-                            </div>
-
-                            <div class="alert alert-warning mb-0">
-                                <small>
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
-                                    Im Wartungsmodus ist die Website für Besucher nicht erreichbar.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Letzte Aktualisierung -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <p class="text-muted mb-0">
-                                <small>
-                                    <i class="bi bi-clock-history me-1"></i>
-                                    Zuletzt aktualisiert: ' . htmlspecialchars($settings['updated_at'] ?? 'Noch nie') . '
-                                </small>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle me-1"></i>Einstellungen speichern
-                </button>
-                <a href="/admin" class="btn btn-secondary">
-                    <i class="bi bi-x-circle me-1"></i>Abbrechen
-                </a>
-            </div>
-        </form>
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $settingsContent,
-        'title' => 'Einstellungen',
-        'activeMenu' => 'settings',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
-
-// Einstellungen speichern
-$app->post('/settings/update', function (Request $request, Response $response) {
-    $settingsManager = $this->get(SettingsManager::class);
-    $csrf = $this->get(CsrfManager::class);
-
-    $data = $request->getParsedBody();
-
-    // CSRF-Validierung
-    if (!$csrf->validateToken($data['csrf_token'] ?? '')) {
-        $response->getBody()->write('CSRF-Token ungültig');
-        return $response->withStatus(403);
-    }
-
-    // Einstellungen aktualisieren
-    $settingsManager->set('site.name', $data['site_name'] ?? 'Meine Website');
-    $settingsManager->set('site.tagline', $data['site_tagline'] ?? '');
-    $settingsManager->set('site.language', $data['site_language'] ?? 'de');
-    $settingsManager->set('site.timezone', $data['site_timezone'] ?? 'Europe/Berlin');
-
-    $settingsManager->set('seo.meta_description', $data['seo_description'] ?? '');
-    $settingsManager->set('seo.meta_keywords', $data['seo_keywords'] ?? '');
-    $settingsManager->set('seo.robots', $data['seo_robots'] ?? 'index, follow');
-
-    $settingsManager->set('theme.active', $data['theme_active'] ?? 'default');
-
-    $settingsManager->set('maintenance.enabled', isset($data['maintenance_enabled']));
-    $settingsManager->set('maintenance.message', $data['maintenance_message'] ?? 'Die Website befindet sich derzeit im Wartungsmodus.');
-
-    return $response->withHeader('Location', '/admin/settings')->withStatus(302);
-})->add($authMiddleware);
+$app->get('/navigation', [NavigationController::class, 'index'])->add($authMiddleware);
 
 // ============================================================================
-// BLOCK-ÜBERSICHT
+// THEME ROUTES (via ThemeController)
 // ============================================================================
 
-// Block-Bibliothek anzeigen
-$app->get('/blocks', function (Request $request, Response $response) {
-    $blockRegistry = $this->get(BlockRegistry::class);
-    $adminAssets = $this->get(AdminAssetManager::class);
-    $lang = $this->get(LanguageManager::class);
-    $auth = $this->get(AuthManager::class);
-    $csrf = $this->get(CsrfManager::class);
+$app->get('/themes', [ThemeController::class, 'index'])->add($authMiddleware);
 
-    $blocks = $blockRegistry->getAllBlocks();
-    $blocksMetadata = $blockRegistry->getAllMetadata();
+// ============================================================================
+// SETTINGS ROUTES (via SettingsController)
+// ============================================================================
 
-    $blocksContent = '
-    <div class="container-fluid mt-4">
-        <div class="page-header">
-            <h1><i class="bi bi-boxes me-2"></i>Block-Bibliothek</h1>
-            <p>Übersicht aller verfügbaren Content-Blöcke (' . count($blocks) . ' Blöcke)</p>
-        </div>
+$app->get('/settings', [SettingsController::class, 'index'])->add($authMiddleware);
+$app->post('/settings/update', [SettingsController::class, 'update'])->add($authMiddleware);
 
-        <div class="row">';
+// ============================================================================
+// BLOCK ROUTES (via BlockController)
+// ============================================================================
 
-    // Dynamisch alle registrierten Blöcke anzeigen
-    foreach ($blocksMetadata as $blockType => $metadata) {
-        $iconClass = $metadata['icon'] ?? 'bi-puzzle';
-        $blockName = $metadata['name'] ?? ucfirst($blockType);
-        $description = $metadata['description'] ?? 'Keine Beschreibung verfügbar';
-        $category = $metadata['category'] ?? 'other';
+$app->get('/blocks', [BlockController::class, 'index'])->add($authMiddleware);
 
-        // Hole den Block für Beispiel-Rendering
-        $block = $blockRegistry->get($blockType);
-        $exampleHtml = '';
+// ============================================================================
+// MODULE ROUTES (via ModuleController)
+// ============================================================================
 
-        // Versuche ein Beispiel zu rendern
-        if ($block) {
-            try {
-                $defaultAttrs = $block->getDefaultAttributes();
-                // Setze Beispiel-Daten für verschiedene Block-Typen (außer Module-Blocks)
-                switch ($blockType) {
-                    case 'paragraph':
-                        $defaultAttrs['text'] = 'Dies ist ein Beispiel-Absatz. Der Paragraph-Block wird für normalen Fließtext verwendet.';
-                        break;
-                    case 'heading':
-                        $defaultAttrs['text'] = 'Beispiel-Überschrift';
-                        $defaultAttrs['level'] = 2;
-                        break;
-                    case 'quote':
-                        $defaultAttrs['text'] = 'Ein inspirierendes Zitat als Beispiel.';
-                        $defaultAttrs['author'] = 'Autor Name';
-                        break;
-                    case 'list':
-                        $defaultAttrs['items'] = ['Punkt 1', 'Punkt 2', 'Punkt 3'];
-                        $defaultAttrs['ordered'] = false;
-                        break;
-                    case 'image':
-                        $defaultAttrs['url'] = 'https://via.placeholder.com/400x200?text=Beispielbild';
-                        $defaultAttrs['alt'] = 'Beispielbild';
-                        $defaultAttrs['caption'] = 'Eine Bildunterschrift';
-                        break;
-                    case 'button':
-                        $defaultAttrs['text'] = 'Beispiel-Button';
-                        $defaultAttrs['url'] = '#';
-                        $defaultAttrs['style'] = 'primary';
-                        break;
-                    // Module-Blöcke (z.B. form) rendern sich selbst mit leeren Attributen
-                    default:
-                        break;
-                }
-
-                $exampleHtml = $block->render($defaultAttrs, '');
-            } catch (\Exception $e) {
-                $exampleHtml = '<div class="alert alert-warning">Beispiel konnte nicht geladen werden</div>';
-            }
-        }
-
-        $blocksContent .= '
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi ' . htmlspecialchars($iconClass) . ' text-hellblau me-2"></i>
-                            ' . htmlspecialchars($blockName) . '
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3"><small>' . htmlspecialchars($description) . '</small></p>
-
-                        <div class="mb-3">
-                            <span class="badge bg-secondary">' . htmlspecialchars($blockType) . '</span>
-                            <span class="badge bg-info">' . htmlspecialchars($category) . '</span>
-                        </div>';
-
-        if (!empty($exampleHtml)) {
-            $blocksContent .= '
-                        <h6 class="fw-bold mb-2">Beispiel:</h6>
-                        <div class="border rounded p-3 bg-light mb-3">
-                            ' . $exampleHtml . '
-                        </div>';
-        }
-
-        $blocksContent .= '
-                    </div>
-                </div>
-            </div>';
-    }
-
-    $blocksContent .= '
-        </div>
-
-        <div class="mt-4">
-            <div class="alert alert-info">
-                <i class="bi bi-lightbulb me-2"></i>
-                <strong>Tipp:</strong> Blöcke werden im Page-Editor verwendet und können beliebig kombiniert werden.
-                Insgesamt sind <strong>' . count($blocks) . ' Blöcke</strong> verfügbar.
-            </div>
-
-            <a href="/admin" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
-            </a>
-        </div>
-    </div>';
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $blocksContent,
-        'title' => 'Block-Bibliothek',
-        'activeMenu' => 'blocks',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $this);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
-
-// Modul-Verwaltung
-$app->get('/modules', function (Request $request, Response $response) use ($container) {
-    $adminAssets = $container->get(AdminAssetManager::class);
-    $lang = $container->get(LanguageManager::class);
-    $auth = $container->get(AuthManager::class);
-    $csrf = $container->get(CsrfManager::class);
-    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
-
-    // Alle Module abrufen
-    $allModules = $moduleManager->getAllModuleInfo();
-    $activeModules = $moduleManager->getActiveModules();
-
-    $modulesContent = '<div class="container-fluid mt-4">
-        <div class="row mb-4">
-            <div class="col">
-                <h2 class="mb-3">' . $lang->t('modules.title') . '</h2>
-                <p class="text-muted">' . $lang->t('modules.description') . '</p>
-            </div>
-        </div>';
-
-    if (empty($allModules)) {
-        $modulesContent .= '
-        <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">' . $lang->t('modules.no_modules_found') . '</h5>
-            <p class="mb-0">' . $lang->t('modules.no_modules_description') . '</p>
-        </div>';
-    } else {
-        $modulesContent .= '<div class="row">';
-        foreach ($allModules as $moduleId => $moduleInfo) {
-            $isActive = in_array($moduleId, $activeModules);
-            $statusBadge = $isActive
-                ? '<span class="badge bg-success">' . $lang->t('modules.active') . '</span>'
-                : '<span class="badge bg-secondary">' . $lang->t('modules.inactive') . '</span>';
-
-            $actionButton = $isActive
-                ? '<a href="/admin/modules/deactivate/' . htmlspecialchars($moduleId) . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' . $lang->t('modules.confirm_deactivate_module') . '\');">' . $lang->t('modules.deactivate') . '</a>'
-                : '<a href="/admin/modules/activate/' . htmlspecialchars($moduleId) . '" class="btn btn-sm btn-primary">' . $lang->t('modules.activate') . '</a>';
-
-            $modulesContent .= '
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">' . htmlspecialchars($moduleInfo['name']) . '</h5>
-                            ' . $statusBadge . '
-                        </div>
-                        <p class="text-muted small mb-2">Version ' . htmlspecialchars($moduleInfo['version']) . '</p>
-                        <p class="card-text">' . htmlspecialchars($moduleInfo['description']) . '</p>
-
-                        <div class="mt-3 mb-2">
-                            <small class="text-muted">
-                                <strong>' . $lang->t('modules.author') . ':</strong> ' . htmlspecialchars($moduleInfo['author']) . '<br>
-                                <strong>' . $lang->t('modules.requires') . ':</strong> fCMS ' . htmlspecialchars($moduleInfo['requires']['fcms'] ?? 'unknown') . '
-                            </small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        ' . $actionButton . '
-                    </div>
-                </div>
-            </div>';
-        }
-        $modulesContent .= '</div>'; // End row
-    }
-
-    $modulesContent .= '</div>'; // End container-fluid
-
-    $html = renderAdminTemplate('layout', [
-        'content' => $modulesContent,
-        'title' => $lang->t('modules.title'),
-        'activeMenu' => 'modules',
-        'adminAssets' => $adminAssets,
-        'lang' => $lang,
-        'username' => $auth->getUsername(),
-        'csrfToken' => $csrf->getToken(),
-    ], $container);
-
-    $response->getBody()->write($html);
-    return $response;
-})->add($authMiddleware);
-
-// Modul aktivieren
-$app->get('/modules/activate/{moduleId}', function (Request $request, Response $response, array $args) use ($container) {
-    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
-    $moduleId = $args['moduleId'];
-
-    try {
-        $moduleManager->activate($moduleId);
-        // Erfolg - zurück zur Modul-Übersicht
-        return $response
-            ->withHeader('Location', '/admin/modules')
-            ->withStatus(302);
-    } catch (\Exception $e) {
-        // Fehler - zurück mit Fehlermeldung (könnte man auch in Session speichern)
-        return $response
-            ->withHeader('Location', '/admin/modules')
-            ->withStatus(302);
-    }
-})->add($authMiddleware);
-
-// Modul deaktivieren
-$app->get('/modules/deactivate/{moduleId}', function (Request $request, Response $response, array $args) use ($container) {
-    $moduleManager = $container->get(\FCMS\Core\ModuleManager::class);
-    $moduleId = $args['moduleId'];
-
-    try {
-        $moduleManager->deactivate($moduleId);
-        // Erfolg - zurück zur Modul-Übersicht
-
-        return $response
-            ->withHeader('Location', '/admin/modules')
-            ->withStatus(302);
-    } catch (\Exception $e) {
-        // Fehler - zurück mit Fehlermeldung
-        return $response
-            ->withHeader('Location', '/admin/modules')
-            ->withStatus(302);
-    }
-})->add($authMiddleware);
+$app->get('/modules', [ModuleController::class, 'index'])->add($authMiddleware);
+$app->get('/modules/activate/{moduleId}', [ModuleController::class, 'activate'])->add($authMiddleware);
+$app->get('/modules/deactivate/{moduleId}', [ModuleController::class, 'deactivate'])->add($authMiddleware);
 
 // Benutzer-Profil (Platzhalter)
 $app->get('/profile', function (Request $request, Response $response) {

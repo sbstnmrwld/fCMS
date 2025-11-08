@@ -4,24 +4,45 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-## [202511081146-dev]
+## [202511081147-dev]
 
 ### Geändert
-- **admin.php Refactoring abgeschlossen**: admin.php erfolgreich von 1648 auf 1088 Zeilen reduziert (34% kleiner)
+- **admin.php Refactoring vollständig abgeschlossen**: admin.php drastisch von **1648 auf 343 Zeilen reduziert** (79% kleiner, 1305 Zeilen entfernt)
   - **Auth-Routes**: Nutzen jetzt AuthController (login, logout)
   - **Page-Routes**: Nutzen jetzt PageController (index, create, store, edit, update, delete)
-  - **Controller-Integration**: Controllers in DI Container registriert und mit Routes verbunden
-  - **Verbesserte Maintainability**: Route-Logik nun in dedizierten Controller-Klassen
-- **PageController vollständig implementiert**:
-  - Vollständige JSON-Block-Parsing-Logik in store() und update() Methoden
-  - BlockRegistry-Integration für Block-Editor
-  - Vollständiges Edit-Formular mit allen Feldern (Titel, Slug, Status, Navigation, SEO, Block-Editor)
-  - Korrekte CSRF-Validierung und Fehlerbehandlung
-- **AuthController korrigiert**:
-  - Login-Template erhält jetzt korrekte Parameter (csrfField, config, lockoutTime)
-  - Behebt Warning "Undefined variable $csrfField" in login.php
+  - **Dashboard-Routes**: Nutzen jetzt DashboardController (index)
+  - **Settings-Routes**: Nutzen jetzt SettingsController (index, update)
+  - **Navigation-Routes**: Nutzen jetzt NavigationController (index)
+  - **Block-Routes**: Nutzen jetzt BlockController (index)
+  - **Module-Routes**: Nutzen jetzt ModuleController (index, activate, deactivate)
+  - **Media-Routes**: Nutzen jetzt MediaController (index, Platzhalter)
+  - **Theme-Routes**: Nutzen jetzt ThemeController (index, Platzhalter)
+  - **Controller-Integration**: Alle 9 Controller in DI Container registriert und mit Routes verbunden
+  - **Verbesserte Maintainability**: Gesamte Route-Logik nun in dedizierten Controller-Klassen
+
+- **Alle Controller vollständig implementiert**:
+  - **PageController**: Vollständiges Edit-Formular mit Block-Editor, JSON-Parsing, CSRF-Validierung
+  - **SettingsController**: Komplettes Settings-Formular (Website, SEO, Theme, Wartungsmodus)
+  - **NavigationController**: Navigation-Management mit Hauptnavigation, Footer-Navigation und verfügbaren Seiten
+  - **BlockController**: Block-Bibliothek mit Live-Beispielen und Metadata für alle registrierten Blöcke
+  - **ModuleController**: Modul-Verwaltung mit Aktivierung/Deaktivierung und vollständiger Modul-Info
+  - **DashboardController**: Dashboard mit Statistiken und Quick-Actions
+  - **AuthController**: Login/Logout mit korrekten Template-Parametern (csrfField, config, lockoutTime)
+  - **MediaController**: Platzhalter für zukünftige Media-Verwaltung
+  - **ThemeController**: Platzhalter für zukünftige Theme-Verwaltung
 
 ### Hinzugefügt
+- **9 Controller-Klassen**: Vollständige MVC-Architektur für Admin-Bereich
+  - src/Controllers/AuthController.php
+  - src/Controllers/PageController.php
+  - src/Controllers/DashboardController.php
+  - src/Controllers/SettingsController.php
+  - src/Controllers/ModuleController.php
+  - src/Controllers/MediaController.php
+  - src/Controllers/NavigationController.php
+  - src/Controllers/ThemeController.php
+  - src/Controllers/BlockController.php
+
 - **Controller-Tests**: Vollständige Test-Abdeckung für neue Controller-Architektur
   - **AuthControllerTest**: 7 Tests für Login/Logout-Funktionalität (CSRF-Validierung, Success/Failure-Szenarien)
   - **PageControllerTest**: 12 Tests für CRUD-Operationen (index, create, store, edit, update, delete)
@@ -29,12 +50,14 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
   - **Test-Suite**: Erweitert von 286 auf 305 Tests (+19 Tests, +43 Assertions)
 
 ### Behoben
-- Login-Seite zeigt keine PHP-Warnings mehr
+- Login-Seite zeigt keine PHP-Warnings mehr (Undefined variable $csrfField)
 - Edit-Seite rendert vollständiges Formular statt leerer Platzhalter
+- Settings-Update verwendet korrekte SettingsManager::set() Methode
+- Module activate/deactivate verwenden korrekte ModuleManager-Methoden
 
 ### Technical Debt
-- **Form-Rendering**: PageController create() Methode hat noch vereinfachten Platzhalter (edit() ist vollständig)
-- **Zukünftig**: Verbleibende Routes in weitere Controller extrahieren (Settings, Modules, Media, Navigation, Themes, Blocks)
+- **Media-Verwaltung**: Noch nicht vollständig implementiert (Platzhalter vorhanden)
+- **Theme-Verwaltung**: Noch nicht vollständig implementiert (Platzhalter vorhanden)
 
 ---
 
