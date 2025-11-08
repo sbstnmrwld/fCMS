@@ -4,6 +4,18 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081112-dev]
+
+### Geändert
+- **PHP Mindestversion**: Erhöhung von PHP 7.4 auf PHP 8.1
+  - Kompatibilität mit modernen Symfony-Komponenten (6.x)
+  - PHP 7.4 und 8.0 sind End-of-Life (keine Security-Updates)
+  - Test-Matrix reduziert auf PHP 8.1, 8.2, 8.3
+- **GitHub Actions**: Deprecated `--no-suggest` Flag entfernt
+- **Composer Validation**: `--strict` Flag entfernt (version-Feld Warnung irrelevant für Projekte)
+
+---
+
 ## [202511081104-dev]
 
 ### Geändert
