@@ -4,6 +4,48 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081146-dev]
+
+### Geändert
+- **admin.php Refactoring abgeschlossen**: admin.php erfolgreich von 1648 auf 1088 Zeilen reduziert (34% kleiner)
+  - **Auth-Routes**: Nutzen jetzt AuthController (login, logout)
+  - **Page-Routes**: Nutzen jetzt PageController (index, create, store, edit, update, delete)
+  - **Controller-Integration**: Controllers in DI Container registriert und mit Routes verbunden
+  - **Verbesserte Maintainability**: Route-Logik nun in dedizierten Controller-Klassen
+- **PageController vollständig implementiert**:
+  - Vollständige JSON-Block-Parsing-Logik in store() und update() Methoden
+  - BlockRegistry-Integration für Block-Editor
+  - Vollständiges Edit-Formular mit allen Feldern (Titel, Slug, Status, Navigation, SEO, Block-Editor)
+  - Korrekte CSRF-Validierung und Fehlerbehandlung
+- **AuthController korrigiert**:
+  - Login-Template erhält jetzt korrekte Parameter (csrfField, config, lockoutTime)
+  - Behebt Warning "Undefined variable $csrfField" in login.php
+
+### Behoben
+- Login-Seite zeigt keine PHP-Warnings mehr
+- Edit-Seite rendert vollständiges Formular statt leerer Platzhalter
+
+### Technical Debt
+- **Form-Rendering**: PageController create() Methode hat noch vereinfachten Platzhalter (edit() ist vollständig)
+- **Zukünftig**: Verbleibende Routes in weitere Controller extrahieren (Settings, Modules, Media, Navigation, Themes, Blocks)
+
+---
+
+## [202511081145-dev]
+
+### Hinzugefügt
+- **Controller-Architektur**: Refactoring-Grundlage für admin.php erstellt
+  - **BaseController**: Basis-Klasse mit gemeinsamen Helper-Methoden
+  - **AuthController**: Login/Logout-Logik vorbereitet
+  - **PageController**: Seiten-CRUD-Operationen vorbereitet
+  - **Routes-Konfiguration**: Zentrale Route-Definitionen in config/routes.php (noch nicht integriert)
+  - **Controller-Dokumentation**: README mit Architektur-Übersicht
+
+### Technical Debt
+- **Nicht integriert**: Controller-Dateien erstellt aber admin.php nutzte sie noch nicht
+
+---
+
 ## [202511081140-dev]
 
 ### Hinzugefügt
