@@ -273,6 +273,7 @@ $app->get('/media', [MediaController::class, 'index'])->add($authMiddleware);
 // ============================================================================
 
 $app->get('/navigation', [NavigationController::class, 'index'])->add($authMiddleware);
+$app->post('/navigation/update', [NavigationController::class, 'update'])->add($authMiddleware);
 
 // ============================================================================
 // THEME ROUTES (via ThemeController)

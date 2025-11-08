@@ -8,7 +8,7 @@
 
 # fCMS - Dateibasiertes Content-Management-System
 
-![Version](https://img.shields.io/badge/version-202511081430--dev-blue.svg)
+![Version](https://img.shields.io/badge/version-202511081603--dev-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -278,8 +278,8 @@ composer install
 # Konfiguration
 cp config/config.example.php config/config.php
 
-# Server starten
-php -S localhost:8000 -t public/
+# Server starten (mit Router-Script für .htaccess-Simulation)
+php -S localhost:8000 -t public/ public/router.php
 ```
 
 ### Architektur-Übersicht
@@ -953,4 +953,4 @@ fCMS verwendet folgende Open-Source-Projekte:
 
 **Entwickelt mit ❤️ für kleine Organisationen und Fördervereine**
 
-Version 202511081430-dev | [Changelog](CHANGELOG.md)
+Version 202511081603-dev | [Changelog](CHANGELOG.md)

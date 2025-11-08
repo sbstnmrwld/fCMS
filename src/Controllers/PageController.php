@@ -96,14 +96,22 @@ class PageController
             }
 
             // Seite erstellen - Validierung erfolgt in ContentManager
+            // Parse nav_location (radio button) to nav_main/nav_footer
+            $navLocation = $data['nav_location'] ?? 'main';
+            $navMain = ($navLocation === 'main');
+            $navFooter = ($navLocation === 'footer');
+
+            // Automatische Position-Zuweisung: Setze ans Ende der gewählten Navigation
+            $navOrder = $this->getNextPositionForLocation($navLocation, null);
+
             $pageData = [
                 'title' => $data['title'] ?? 'Neue Seite',
                 'slug' => $data['slug'] ?? '',
                 'status' => $data['status'] ?? 'draft',
                 'sections' => $sections,
-                'nav_main' => $data['nav_main'] ?? false,
-                'nav_footer' => $data['nav_footer'] ?? false,
-                'nav_order' => $data['nav_order'] ?? 0,
+                'nav_main' => $navMain,
+                'nav_footer' => $navFooter,
+                'nav_order' => $navOrder,
                 'nav_label' => $data['nav_label'] ?? '',
                 'meta_description' => $data['meta_description'] ?? '',
                 'meta_keywords' => $data['meta_keywords'] ?? '',
@@ -180,14 +188,33 @@ class PageController
                 ];
             }
 
+            // Parse nav_location (radio button) to nav_main/nav_footer
+            $navLocation = $data['nav_location'] ?? 'main';
+            $navMain = ($navLocation === 'main');
+            $navFooter = ($navLocation === 'footer');
+
+            // Bei Änderung der Navigation: Automatische Position-Zuweisung
+            $existingPage = $this->contentManager->getPage($slug);
+            $currentNavMain = $existingPage['navigation']['main'] ?? false;
+            $currentNavFooter = $existingPage['navigation']['footer'] ?? false;
+            $navigationChanged = ($currentNavMain && !$navMain) || ($currentNavFooter && !$navFooter);
+
+            // Wenn Navigation geändert wurde, setze ans Ende der neuen Navigation
+            // Ansonsten behalte aktuelle Position
+            if ($navigationChanged) {
+                $navOrder = $this->getNextPositionForLocation($navLocation, $slug);
+            } else {
+                $navOrder = (int)($existingPage['navigation']['order'] ?? 0);
+            }
+
             // Seite aktualisieren - Validierung erfolgt in ContentManager
             $pageData = [
                 'title' => $data['title'] ?? 'Neue Seite',
                 'status' => $data['status'] ?? 'draft',
                 'sections' => $sections,
-                'nav_main' => $data['nav_main'] ?? false,
-                'nav_footer' => $data['nav_footer'] ?? false,
-                'nav_order' => $data['nav_order'] ?? 0,
+                'nav_main' => $navMain,
+                'nav_footer' => $navFooter,
+                'nav_order' => $navOrder,
                 'nav_label' => $data['nav_label'] ?? '',
                 'meta_description' => $data['meta_description'] ?? '',
                 'meta_keywords' => $data['meta_keywords'] ?? '',
@@ -223,6 +250,38 @@ class PageController
         } catch (StorageException $_e) {
             return $response->withStatus(500);
         }
+    }
+
+    /**
+     * Berechnet die nächste Position für eine Navigation
+     *
+     * @param string $location 'main' oder 'footer'
+     * @param string|null $excludeSlug Slug der aktuellen Seite (beim Update)
+     * @return int Nächste verfügbare Position
+     */
+    private function getNextPositionForLocation(string $location, ?string $excludeSlug = null): int
+    {
+        $allPages = $this->contentManager->getAllPages();
+
+        // Filter pages by location (excluding current page if provided)
+        $pagesInLocation = array_filter($allPages, function ($page) use ($location, $excludeSlug) {
+            if (!empty($excludeSlug) && $page['slug'] === $excludeSlug) {
+                return false;
+            }
+
+            $inMain = $page['navigation']['main'] ?? false;
+            $inFooter = $page['navigation']['footer'] ?? false;
+
+            return ($location === 'main' && $inMain) || ($location === 'footer' && $inFooter);
+        });
+
+        // Extract positions
+        $existingPositions = array_map(function ($page) {
+            return (int)($page['navigation']['order'] ?? 0);
+        }, $pagesInLocation);
+
+        // Return next position (max + 1, or 0 if empty)
+        return empty($existingPositions) ? 0 : max($existingPositions) + 1;
     }
 
     // Helper-Methoden für Rendering (nutzen bestehende Funktion)
@@ -368,25 +427,25 @@ class PageController
                             <div class="card-header"><strong><i class="bi bi-list-ul me-1"></i>Navigation</strong></div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="nav_label" class="form-label"><i class="bi bi-tag me-1"></i>Menü-Eintrag</label>
+                                    <label class="form-label"><i class="bi bi-compass me-1"></i>Navigation Position *</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" id="nav_main" name="nav_location" value="main"' . ($navMain ? ' checked' : '') . ' required>
+                                        <label class="form-check-label" for="nav_main">
+                                            <i class="bi bi-menu-button-wide me-1"></i>Hauptnavigation
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" id="nav_footer" name="nav_location" value="footer"' . ($navFooter ? ' checked' : '') . ' required>
+                                        <label class="form-check-label" for="nav_footer">
+                                            <i class="bi bi-menu-down me-1"></i>Footer-Navigation
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Jede Seite muss genau einer Navigation zugeordnet sein. Die Reihenfolge kann über <a href="/admin/navigation">Navigation verwalten</a> per Drag & Drop angepasst werden.</small>
+                                </div>
+                                <div>
+                                    <label for="nav_label" class="form-label"><i class="bi bi-tag me-1"></i>Menü-Label</label>
                                     <input type="text" class="form-control" id="nav_label" name="nav_label" value="' . $navLabel . '" placeholder="Leer lassen um Seitentitel zu verwenden">
                                     <small class="form-text text-muted">Wird in Navigationsmenüs angezeigt</small>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="nav_main" name="nav_main" value="1"' . ($navMain ? ' checked' : '') . '>
-                                    <label class="form-check-label" for="nav_main">
-                                        <i class="bi bi-menu-button-wide me-1"></i>Hauptnavigation
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="nav_footer" name="nav_footer" value="1"' . ($navFooter ? ' checked' : '') . '>
-                                    <label class="form-check-label" for="nav_footer">
-                                        <i class="bi bi-menu-down me-1"></i>Footer-Navigation
-                                    </label>
-                                </div>
-                                <div class="mt-3">
-                                    <label for="nav_order" class="form-label"><i class="bi bi-arrow-down-up me-1"></i>Reihenfolge</label>
-                                    <input type="number" class="form-control" id="nav_order" name="nav_order" value="' . $navOrder . '" min="0">
                                 </div>
                             </div>
                         </div>

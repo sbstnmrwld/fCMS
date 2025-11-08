@@ -33,180 +33,190 @@ class NavigationController
     }
 
     /**
+     * Aktualisiert die Navigation per API (für Drag & Drop)
+     */
+    public function update(Request $request, Response $response): Response
+    {
+        // Parse JSON body
+        $contentType = $request->getHeaderLine('Content-Type');
+        if (strpos($contentType, 'application/json') !== false) {
+            $body = (string) $request->getBody();
+            $data = json_decode($body, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $response->getBody()->write(json_encode(['success' => false, 'error' => 'Invalid JSON']));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            }
+        } else {
+            $data = $request->getParsedBody();
+        }
+
+        // CSRF-Validierung
+        if (!$this->csrf->validateRequest($data)) {
+            $response->getBody()->write(json_encode(['success' => false, 'error' => 'Invalid CSRF token']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(403);
+        }
+
+        try {
+            // Erwarte Struktur: ['main' => [...slugs], 'footer' => [...slugs]]
+            $mainNav = $data['main'] ?? [];
+            $footerNav = $data['footer'] ?? [];
+
+            // Validiere dass es Arrays sind
+            if (!is_array($mainNav) || !is_array($footerNav)) {
+                throw new \FCMS\Exceptions\ValidationException('Invalid navigation data: main=' . gettype($mainNav) . ', footer=' . gettype($footerNav));
+            }
+
+            // Aktualisiere alle Seiten
+            $this->updateNavigationStructure($mainNav, $footerNav);
+
+            $response->getBody()->write(json_encode(['success' => true]));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (\Exception $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+    }
+
+    /**
+     * Aktualisiert die Navigationsstruktur aller Seiten
+     */
+    private function updateNavigationStructure(array $mainSlugs, array $footerSlugs): void
+    {
+        $allPages = $this->contentManager->getAllPages();
+
+        foreach ($allPages as $page) {
+            $slug = $page['slug'];
+            $inMain = in_array($slug, $mainSlugs);
+            $inFooter = in_array($slug, $footerSlugs);
+
+            // Bestimme Order basierend auf Position im Array
+            $mainOrder = $inMain ? array_search($slug, $mainSlugs) : 0;
+            $footerOrder = $inFooter ? array_search($slug, $footerSlugs) : 0;
+
+            // Aktualisiere die Seite
+            $this->contentManager->updatePage($slug, [
+                'nav_main' => $inMain,
+                'nav_footer' => $inFooter,
+                'nav_order' => $inMain ? $mainOrder : $footerOrder,
+            ]);
+        }
+    }
+
+    /**
      * Zeigt Navigation-Verwaltung
      */
     public function index(Request $request, Response $response): Response
     {
-        $allPages = $this->contentManager->getAllPages();
         $mainNavPages = $this->contentManager->getNavigationPages('main');
         $footerNavPages = $this->contentManager->getNavigationPages('footer');
 
-        // Hauptnavigation Tabelle
-        $mainNavTable = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-menu-button-wide me-2"></i>Hauptnavigation</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-grip-vertical me-1"></i>Reihenfolge</th>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-tag me-1"></i>Menü-Label</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
+        // Helper function to render page item
+        $renderPageItem = function ($page) {
+            $statusBadge = $page['status'] === 'published'
+                ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
+                : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
 
-        if (empty($mainNavPages)) {
-            $mainNavTable .= '<tr><td colspan="6" class="text-center text-muted">Keine Seiten in der Hauptnavigation</td></tr>';
-        } else {
-            foreach ($mainNavPages as $page) {
-                $statusBadge = $page['status'] === 'published'
-                    ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                    : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
+            $label = ($page['navigation']['label'] ?? '') ?: $page['title'];
 
-                $label = ($page['navigation']['label'] ?? '') ?: $page['title'];
-
-                $mainNavTable .= '<tr>
-                <td><strong>' . ($page['navigation']['order'] ?? 0) . '</strong></td>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td>' . htmlspecialchars($label) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
+            return '<div class="navigation-page-item" data-slug="' . htmlspecialchars($page['slug']) . '">
+                <div class="navigation-page-item-drag-handle">
+                    <i class="bi bi-grip-vertical"></i>
+                </div>
+                <div class="navigation-page-item-content">
+                    <div class="navigation-page-item-title">
+                        <strong>' . htmlspecialchars($page['title']) . '</strong>
+                        ' . $statusBadge . '
+                    </div>
+                    <div class="navigation-page-item-meta">
+                        <small class="text-muted">
+                            Label: <span class="text-dark">' . htmlspecialchars($label) . '</span> |
+                            Slug: <code>' . htmlspecialchars($page['slug']) . '</code>
+                        </small>
+                    </div>
+                </div>
+                <div class="navigation-page-item-actions">
                     <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
+                        <i class="bi bi-pencil"></i>
                     </a>
-                </td>
-            </tr>';
-            }
+                </div>
+            </div>';
+        };
+
+        // Hauptnavigation Liste
+        $mainNavItems = '';
+        foreach ($mainNavPages as $page) {
+            $mainNavItems .= $renderPageItem($page);
+        }
+        if (empty($mainNavItems)) {
+            $mainNavItems = '<div class="text-center text-muted py-4">Ziehen Sie Seiten hierher, um sie zur Hauptnavigation hinzuzufügen</div>';
         }
 
-        $mainNavTable .= '</tbody></table>
-            </div>
-        </div>
-    </div>';
-
-        // Footer Navigation Tabelle
-        $footerNavTable = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-menu-down me-2"></i>Footer-Navigation</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-grip-vertical me-1"></i>Reihenfolge</th>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-tag me-1"></i>Menü-Label</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-        if (empty($footerNavPages)) {
-            $footerNavTable .= '<tr><td colspan="6" class="text-center text-muted">Keine Seiten in der Footer-Navigation</td></tr>';
-        } else {
-            foreach ($footerNavPages as $page) {
-                $statusBadge = $page['status'] === 'published'
-                    ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                    : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
-
-                $label = ($page['navigation']['label'] ?? '') ?: $page['title'];
-
-                $footerNavTable .= '<tr>
-                <td><strong>' . ($page['navigation']['order'] ?? 0) . '</strong></td>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td>' . htmlspecialchars($label) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
-                    <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
-                    </a>
-                </td>
-            </tr>';
-            }
+        // Footer Navigation Liste
+        $footerNavItems = '';
+        foreach ($footerNavPages as $page) {
+            $footerNavItems .= $renderPageItem($page);
+        }
+        if (empty($footerNavItems)) {
+            $footerNavItems = '<div class="text-center text-muted py-4">Ziehen Sie Seiten hierher, um sie zur Footer-Navigation hinzuzufügen</div>';
         }
 
-        $footerNavTable .= '</tbody></table>
-            </div>
-        </div>
-    </div>';
+        $navigationContent = '<link rel="stylesheet" href="' . $this->adminAssets->css('navigation.css') . '">
 
-        // Verfügbare Seiten (nicht in Navigation)
-        $availablePages = array_filter($allPages, function ($page) {
-            return !($page['navigation']['main'] ?? false) && !($page['navigation']['footer'] ?? false);
-        });
-
-        $availablePagesCard = '<div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-files me-2"></i>Verfügbare Seiten (nicht in Navigation)</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-file-text me-1"></i>Seite</th>
-                            <th><i class="bi bi-link-45deg me-1"></i>Slug</th>
-                            <th><i class="bi bi-circle-fill me-1"></i>Status</th>
-                            <th><i class="bi bi-gear me-1"></i>Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
-        if (empty($availablePages)) {
-            $availablePagesCard .= '<tr><td colspan="4" class="text-center text-muted">Alle Seiten sind bereits einer Navigation zugeordnet</td></tr>';
-        } else {
-            foreach ($availablePages as $page) {
-                $statusBadge = $page['status'] === 'published'
-                    ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Veröffentlicht</span>'
-                    : '<span class="badge bg-secondary"><i class="bi bi-pencil-square me-1"></i>Entwurf</span>';
-
-                $availablePagesCard .= '<tr>
-                <td>' . htmlspecialchars($page['title']) . '</td>
-                <td><code>' . htmlspecialchars($page['slug']) . '</code></td>
-                <td>' . $statusBadge . '</td>
-                <td>
-                    <a href="/admin/pages/edit/' . urlencode($page['slug']) . '" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil me-1"></i>Bearbeiten
+        <div class="container-fluid mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-list-ul me-2"></i>Navigation verwalten</h2>
+                <div>
+                    <button id="save-navigation" class="btn btn-primary me-2" style="display:none;">
+                        <i class="bi bi-save me-1"></i>Änderungen speichern
+                    </button>
+                    <a href="/admin/pages/new" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i>Neue Seite erstellen
                     </a>
-                </td>
-            </tr>';
-            }
-        }
+                </div>
+            </div>
 
-        $availablePagesCard .= '</tbody></table>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Hinweis:</strong> Verschieben Sie Seiten per Drag & Drop zwischen den Listen und ordnen Sie sie neu an.
+                Alle Seiten müssen in Haupt- oder Footer-Navigation sein - ein Entfernen ist nicht möglich.
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-menu-button-wide me-2"></i>Hauptnavigation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="main-nav-list" class="navigation-list" data-nav-type="main">
+                                ' . $mainNavItems . '
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-menu-down me-2"></i>Footer-Navigation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="footer-nav-list" class="navigation-list" data-nav-type="footer">
+                                ' . $footerNavItems . '
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>';
 
-        $navigationContent = '<div class="container-fluid mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-list-ul me-2"></i>Navigation verwalten</h2>
-            <a href="/admin/pages/new" class="btn btn-success">
-                <i class="bi bi-plus-circle me-1"></i>Neue Seite erstellen
-            </a>
-        </div>
-
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Hinweis:</strong> Um Seiten zur Navigation hinzuzufügen oder die Reihenfolge zu ändern,
-            bearbeiten Sie die entsprechende Seite und passen Sie die Navigationseinstellungen an.
-        </div>
-
-        ' . $mainNavTable . '
-        ' . $footerNavTable . '
-        ' . $availablePagesCard . '
-    </div>';
+        <script>
+            const CSRF_TOKEN = "' . $this->csrf->getToken() . '";
+        </script>
+        <script src="' . $this->adminAssets->js('navigation.js') . '"></script>';
 
         $html = renderAdminTemplate('layout', [
             'content' => $navigationContent,

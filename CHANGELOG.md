@@ -4,6 +4,73 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081603-dev]
+
+### Hinzugefügt
+- **Drag-and-Drop Navigation-Verwaltung**: Vollständig interaktive Navigation-Verwaltung unter `/admin/navigation`
+  - Seiten per Drag & Drop zwischen Haupt- und Footer-Navigation verschieben
+  - Reihenfolge per Drag & Drop innerhalb der Navigationen anpassen
+  - Echtzeit-Speichern mit visueller Feedback-Anzeige
+  - Automatische Neuberechnung aller Positionen nach Änderungen
+  - Responsive 2-Spalten-Layout mit visuellen Drag-Handles
+  - Verhindert Entfernen von Seiten (alle müssen in einer Navigation sein)
+- **NavigationController.update()**: JSON-API für Navigation-Updates
+  - Akzeptiert JSON-Struktur: `{main: [...slugs], footer: [...slugs]}`
+  - CSRF-Token-Validierung
+  - Batch-Update aller Seiten mit neuer Position
+- **JavaScript NavigationManager**: Client-seitige Drag-and-Drop-Logik
+  - Native HTML5 Drag & Drop API
+  - Bidirektionales Verschieben zwischen Listen
+  - Automatisches Sortieren während des Dragging
+  - Bootstrap-Notifications für Feedback
+- **CSS navigation.css**: Styling für Drag-and-Drop-Interface
+  - Hover-Effekte und visuelle Drag-Feedback
+  - Responsive Design für mobile Geräte
+  - Dark-Mode-Support
+- **Router-Script**: `public/router.php` für PHP Built-in Development Server
+  - Simuliert .htaccess Rewrite-Regeln
+  - Admin-Assets werden korrekt ausgeliefert
+  - Ermöglicht lokale Entwicklung ohne Apache/Nginx
+- **6 neue NavigationController-Tests**: Vollständige Test-Coverage für Drag-and-Drop-API
+- **PageController**: Exklusive Navigation-Auswahl mit Radio-Buttons
+  - Nur eine Navigation wählbar (entweder Main oder Footer)
+  - Automatische Position-Zuweisung beim Erstellen/Wechseln
+  - Link zur Drag-and-Drop-Verwaltung im Formular
+
+### Geändert
+- **Navigation-Verwaltung Workflow**: Position wird nicht mehr manuell eingegeben
+  - Position-Feld aus Seitenbearbeitung entfernt
+  - Automatische Zuweisung ans Ende der gewählten Navigation
+  - Reihenfolge nur noch über Drag-and-Drop in `/admin/navigation` anpassbar
+  - Vereinfachtes UI in Seitenbearbeitung
+- **PageController store()/update()**: Automatische Position-Berechnung
+  - Neue Seiten werden ans Ende gesetzt
+  - Bei Navigation-Wechsel (Main ↔ Footer) ans Ende der neuen Navigation
+  - Ansonsten Position beibehalten
+- **Navigation-API**: JSON statt URL-encoded für Arrays
+  - Korrekte Übertragung von Array-Strukturen
+  - Content-Type: application/json
+  - Explizites JSON-Parsing im Backend
+- **CSS-Klassennamen**: Konflikt mit Bootstrap's `.nav-item` behoben
+  - `.nav-item` → `.navigation-page-item` (und alle Varianten)
+  - Admin-Navigation funktioniert wieder korrekt
+- **Dokumentation**: Development Server Befehle aktualisiert
+  - CLAUDE.md und README.md mit Router-Script-Verwendung
+  - Korrekte Anleitung für lokale Entwicklung
+
+### Entfernt
+- **Position-API-Endpunkte**: `/pages/suggest-position` und `/pages/check-position`
+  - Nicht mehr benötigt durch Drag-and-Drop-Verwaltung
+  - `page-form.js` vollständig entfernt
+  - 5 Tests für Position-API entfernt
+
+### Technische Details
+- **Tests**: 311 Tests, 468 Assertions (alle grün)
+- **Code-Qualität**: Strict types, vollständige Type-Hints, Exception-Handling
+- **Security**: CSRF-Validierung, Input-Validierung, keine XSS-Möglichkeiten
+
+---
+
 ## [202511081430-dev]
 
 ### Behoben

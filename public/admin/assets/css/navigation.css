@@ -1,0 +1,141 @@
+/**
+ * Navigation Drag & Drop Styling
+ * fCMS Admin Navigation Management
+ */
+
+.navigation-list {
+    min-height: 100px;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.navigation-list.drag-over {
+    background-color: rgba(63, 169, 245, 0.1);
+    border: 2px dashed #3FA9F5;
+}
+
+.navigation-page-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    cursor: move;
+    transition: all 0.2s ease;
+}
+
+.navigation-page-item:hover {
+    border-color: #3FA9F5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigation-page-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.navigation-page-item.drag-over {
+    border-top: 3px solid #3FA9F5;
+    margin-top: 0.5rem;
+}
+
+.navigation-page-item-drag-handle {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    font-size: 1.25rem;
+    cursor: grab;
+    user-select: none;
+}
+
+.navigation-page-item-drag-handle:active {
+    cursor: grabbing;
+}
+
+.navigation-page-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.navigation-page-item-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.navigation-page-item-title strong {
+    color: #2D2E32;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.navigation-page-item-meta {
+    font-size: 0.875rem;
+}
+
+.navigation-page-item-meta code {
+    background-color: #f8f9fa;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.8125rem;
+}
+
+.navigation-page-item-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* Empty state */
+.navigation-list .text-muted {
+    pointer-events: none;
+}
+
+/* Save button animation */
+#save-navigation {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .row {
+        gap: 0;
+    }
+}
+
+/* Dark mode support (falls aktiviert) */
+@media (prefers-color-scheme: dark) {
+    .navigation-page-item {
+        background: #2D2E32;
+        border-color: #495057;
+    }
+
+    .navigation-page-item:hover {
+        border-color: #3FA9F5;
+    }
+
+    .navigation-page-item-title strong {
+        color: #f8f9fa;
+    }
+
+    .navigation-page-item-meta code {
+        background-color: #495057;
+        color: #f8f9fa;
+    }
+}
