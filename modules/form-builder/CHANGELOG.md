@@ -5,6 +5,37 @@ Alle wichtigen Änderungen am FormBuilder Modul werden in dieser Datei dokumenti
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `YYYYMMDDhhmm-{dev|stable}` (Timestamp-basiert)
 
+## [202511081600-dev] - 2025-11-08
+
+### Behoben
+- **FormBlock Frontend-Rendering**: FormBlock wird jetzt korrekt im Frontend angezeigt
+  - `ModuleManager::discoverModules()` wird jetzt in `public/index.php` aufgerufen
+  - FormBlock wird erfolgreich im BlockRegistry registriert
+- **Formular-Submission**: Submit-Route funktioniert jetzt korrekt
+  - `$self`-Referenz in `registerPublicRoutes()` implementiert
+  - `handleSubmission()` ist jetzt public und von Closure aufrufbar
+- **Fehlende Field-Namen**: Automatische Generierung von `name`-Attributen aus Labels
+  - Verhindert leere `name`-Attribute bei Formularfeldern
+- **Glob-Pattern**: Korrektur des Pfads in `FormBlock::renderEditor()` (fehlender Schrägstrich)
+
+### Hinzugefügt
+- **Module-Asset-Route**: Dynamisches Serving von Modul-Assets über `/modules/{module}/assets/{path}`
+  - Sicherheitscheck gegen Directory Traversal
+  - Unterstützung für CSS, JS, Bilder, Fonts
+  - Content-Type-Detection für verschiedene Dateitypen
+- **E-Mail-Benachrichtigungen**: Vollständige Implementation
+  - Unterstützung für `settings.email_notification` und `settings.notification_email`
+  - Mail-Logging unter `logs/mails/` für Development
+  - Debug-Logging für Fehlersuche
+- **Automatische Bereinigung**: Cleanup-System für alte Daten
+  - Submissions: Nur die letzten 100 pro Formular werden behalten
+  - Mail-Logs: Nur die letzten 100 Log-Dateien werden behalten
+  - System-Logs: Nur die letzten 100 Log-Dateien werden behalten
+  - Bereinigung erfolgt automatisch (Submissions bei jedem Submit, Logs gelegentlich beim Boot)
+
+### Geändert
+- `.gitignore`: Anpassungen für `content/submissions/*` und `logs/*`
+
 ## [202511071800-dev] - 2025-11-07
 
 ### Geändert

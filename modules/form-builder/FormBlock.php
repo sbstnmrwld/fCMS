@@ -142,7 +142,7 @@ class FormBlock extends AbstractBlock implements BlockInterface
         $forms = [];
 
         if (is_dir($formsDir)) {
-            $files = glob($formsDir . '*.json');
+            $files = glob($formsDir . '/*.json');
             foreach ($files as $file) {
                 $formData = json_decode(file_get_contents($file), true);
                 if ($formData) {
@@ -249,6 +249,13 @@ class FormBlock extends AbstractBlock implements BlockInterface
         $required = $field['required'] ?? false;
         $placeholder = $field['placeholder'] ?? '';
         $options = $field['options'] ?? [];
+
+        // Fallback: Wenn kein Name vorhanden, generiere einen aus dem Label
+        if (empty($name)) {
+            $name = !empty($label) 
+                ? 'field_' . preg_replace('/[^a-z0-9_]/', '_', strtolower($label))
+                : 'field_' . uniqid();
+        }
 
         $fieldId = 'field_' . uniqid();
         $requiredAttr = $required ? 'required' : '';

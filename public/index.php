@@ -81,7 +81,9 @@ $container->set(BlockRegistry::class, function ($c) {
 
 $container->set(\FCMS\Core\ModuleManager::class, function ($c) {
     $config = $c->get('config');
-    return new \FCMS\Core\ModuleManager($config['paths']['modules'], $config['paths']['content']);
+    $moduleManager = new \FCMS\Core\ModuleManager($config['paths']['modules'], $config['paths']['content']);
+    $moduleManager->discoverModules();
+    return $moduleManager;
 });
 
 // Slim App erstellen
@@ -99,6 +101,51 @@ foreach ($activeModules as $module) {
         $module->registerPublicRoutes($app, $container);
     }
 }
+
+// Route für Module-Assets
+$app->get('/modules/{moduleName}/assets/{path:.*}', function (Request $request, Response $response, array $args) {
+    $moduleName = $args['moduleName'];
+    $path = $args['path'];
+    
+    $config = $this->get('config');
+    $modulesPath = $config['paths']['modules'];
+    $filePath = $modulesPath . '/' . $moduleName . '/assets/' . $path;
+    
+    // Sicherheitscheck: Verhindere Directory Traversal
+    $realPath = realpath($filePath);
+    $realModulesPath = realpath($modulesPath);
+    
+    if (!$realPath || !$realModulesPath || strpos($realPath, $realModulesPath) !== 0) {
+        $response->getBody()->write('403 - Zugriff verweigert');
+        return $response->withStatus(403);
+    }
+    
+    if (!file_exists($filePath) || !is_file($filePath)) {
+        $response->getBody()->write('404 - Asset nicht gefunden');
+        return $response->withStatus(404);
+    }
+    
+    // Content-Type ermitteln
+    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+    $contentTypes = [
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'svg' => 'image/svg+xml',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'ttf' => 'font/ttf',
+        'eot' => 'application/vnd.ms-fontobject',
+    ];
+    
+    $contentType = $contentTypes[$extension] ?? 'application/octet-stream';
+    
+    $response->getBody()->write(file_get_contents($filePath));
+    return $response->withHeader('Content-Type', $contentType);
+});
 
 // Routing
 $app->get('/', function (Request $request, Response $response) {

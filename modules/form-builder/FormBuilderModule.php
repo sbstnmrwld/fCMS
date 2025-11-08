@@ -54,7 +54,34 @@ class FormBuilderModule extends AbstractModule
 
         // Registriere API-Endpunkt für verfügbare Formulare
         $this->registerApiRoutes($app, $container);
+        
+        // Bereinige alte Logs (mit 10% Wahrscheinlichkeit, um Performance zu schonen)
+        if (rand(1, 10) === 1) {
+            $this->cleanupAllLogs($config);
+        }
     }
+
+    /**
+     * Bereinigt alle Logs (wird gelegentlich beim Boot aufgerufen)
+     */
+    private function cleanupAllLogs(array $config): void
+    {
+        // Bereinige allgemeine Logs
+        $logsPath = $config['paths']['logs'] ?? __DIR__ . '/../../logs';
+        if (is_dir($logsPath)) {
+            $this->cleanupOldLogs($logsPath, 100);
+        }
+        
+        // Bereinige Mail-Logs
+        $mailLogsPath = $logsPath . '/mails';
+        if (is_dir($mailLogsPath)) {
+            $this->cleanupOldLogs($mailLogsPath, 100);
+        }
+    }
+
+    /**
+     * Registriert API-Endpunkte für das Modul
+```
 
     /**
      * Registriert API-Endpunkte für das Modul
@@ -143,16 +170,18 @@ class FormBuilderModule extends AbstractModule
      */
     public function registerPublicRoutes(object $app, object $container): void
     {
+        $self = $this;
+        
         // Formular-Submission Handler
-        $app->post('/form/submit/{id}', function (Request $request, Response $response, array $args) use ($container) {
-            return $this->handleSubmission($request, $response, $container, $args['id']);
+        $app->post('/form/submit/{id}', function (Request $request, Response $response, array $args) use ($container, $self) {
+            return $self->handleSubmission($request, $response, $container, $args['id']);
         });
     }
 
     /**
      * Verarbeitet eine Formular-Einsendung
      */
-    private function handleSubmission(Request $request, Response $response, object $container, string $formId): Response
+    public function handleSubmission(Request $request, Response $response, object $container, string $formId): Response
     {
         $response = $response->withHeader('Content-Type', 'application/json');
 
@@ -202,8 +231,11 @@ class FormBuilderModule extends AbstractModule
             $submissionId = $this->saveSubmission($formId, $postData, $request);
 
             // E-Mail versenden (falls konfiguriert)
-            if (!empty($formData['email_notification'])) {
-                $this->sendEmailNotification($formData, $postData, $submissionId);
+            $emailEnabled = $formData['settings']['email_notification'] ?? $formData['email_notification'] ?? false;
+            $notificationEmail = $formData['settings']['notification_email'] ?? $formData['email_notification'] ?? null;
+            
+            if ($emailEnabled && !empty($notificationEmail)) {
+                $this->sendEmailNotification($formData, $postData, $submissionId, $notificationEmail);
             }
 
             $response->getBody()->write(json_encode([
@@ -295,17 +327,42 @@ class FormBuilderModule extends AbstractModule
 
         file_put_contents($submissionFile, json_encode($submission, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
+        // Alte Submissions bereinigen (nur die letzten 100 behalten)
+        $this->cleanupOldSubmissions($submissionsDir, 100);
+
         return $submissionId;
+    }
+
+    /**
+     * Bereinigt alte Submissions und behält nur die neuesten
+     */
+    private function cleanupOldSubmissions(string $submissionsDir, int $keepCount = 100): void
+    {
+        $files = glob($submissionsDir . '/*.json');
+        
+        if (count($files) <= $keepCount) {
+            return;
+        }
+
+        // Sortiere nach Änderungsdatum (neueste zuerst)
+        usort($files, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        // Lösche alle Dateien nach den ersten $keepCount
+        $filesToDelete = array_slice($files, $keepCount);
+        foreach ($filesToDelete as $file) {
+            @unlink($file);
+        }
     }
 
     /**
      * Versendet E-Mail-Benachrichtigung
      */
-    private function sendEmailNotification(array $formData, array $submissionData, string $submissionId): bool
+    private function sendEmailNotification(array $formData, array $submissionData, string $submissionId, string $to): bool
     {
-        $to = $formData['email_notification'] ?? '';
-
         if (empty($to)) {
+            error_log('sendEmailNotification: Keine E-Mail-Adresse angegeben');
             return false;
         }
 
@@ -339,7 +396,69 @@ class FormBuilderModule extends AbstractModule
             $headerString .= "{$key}: {$value}\r\n";
         }
 
-        return mail($to, $subject, $body, $headerString);
+        // Versuche E-Mail zu senden
+        try {
+            $result = mail($to, $subject, $body, $headerString);
+            
+            // Log für Debugging (auch wenn mail() TRUE zurückgibt, heißt das nicht, dass die Mail ankommt)
+            $logMessage = sprintf(
+                "[%s] Form Notification Email %s\nTo: %s\nSubject: %s\n%s\n",
+                date('Y-m-d H:i:s'),
+                $result ? 'SENT (mail() returned true)' : 'FAILED (mail() returned false)',
+                $to,
+                $subject,
+                str_repeat('-', 80)
+            );
+            error_log($logMessage);
+            
+            // Zusätzlich: E-Mail in Datei speichern (für Development ohne Mail-Server)
+            $mailLogPath = __DIR__ . '/../../logs/mails';
+            if (!is_dir($mailLogPath)) {
+                mkdir($mailLogPath, 0755, true);
+            }
+            
+            $mailLogFile = $mailLogPath . '/mail-' . date('Y-m-d') . '.log';
+            $fullMailLog = sprintf(
+                "=== E-Mail gesendet um %s ===\nAn: %s\nBetreff: %s\n\n%s\n\n%s\n\n",
+                date('d.m.Y H:i:s'),
+                $to,
+                $subject,
+                $body,
+                str_repeat('=', 80)
+            );
+            file_put_contents($mailLogFile, $fullMailLog, FILE_APPEND);
+            
+            // Alte Mail-Logs bereinigen (nur die letzten 100 behalten)
+            $this->cleanupOldLogs($mailLogPath, 100);
+            
+            return $result;
+        } catch (\Exception $e) {
+            error_log('Fehler beim E-Mail-Versand: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Bereinigt alte Log-Dateien und behält nur die neuesten
+     */
+    private function cleanupOldLogs(string $logPath, int $keepCount = 100): void
+    {
+        $files = glob($logPath . '/*.log');
+        
+        if (count($files) <= $keepCount) {
+            return;
+        }
+
+        // Sortiere nach Änderungsdatum (neueste zuerst)
+        usort($files, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        // Lösche alle Dateien nach den ersten $keepCount
+        $filesToDelete = array_slice($files, $keepCount);
+        foreach ($filesToDelete as $file) {
+            @unlink($file);
+        }
     }
 
     private function showFormsList(Request $request, Response $response, object $container): Response

@@ -8,18 +8,20 @@
 !/content/media/.gitkeep
 content/active-modules.json
 content/forms/*
+content/submissions/*
 
 # Config (user specific)
 /config/config.php
 !/config/config.example.php
 
 # Logs
-/logs/*.log
+/logs/*
 !/logs/.gitkeep
 
 # IDE
 .vscode/
 .idea/
+.github
 *.sublime-*
 
 # OS

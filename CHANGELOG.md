@@ -4,7 +4,27 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-## [202511081603-dev]
+## [202511081615-dev] - 2025-11-08
+
+### Hinzugefügt
+- **Module-Asset-Route**: Dynamisches Serving von Modul-Assets über `/modules/{module}/assets/{path}`
+  - Sicherheitscheck gegen Directory Traversal
+  - Content-Type-Detection für CSS, JS, Bilder, Fonts
+  - Ermöglicht Modulen eigene Assets im Frontend zu laden
+
+### Geändert
+- **ModuleManager Frontend-Integration**: Module werden jetzt korrekt im Frontend initialisiert
+  - `ModuleManager::discoverModules()` wird in `public/index.php` aufgerufen
+  - Module-Blöcke (z.B. FormBlock) werden im BlockRegistry registriert
+  - Public Routes von Modulen werden korrekt registriert
+- **.gitignore**: Erweitert um `content/submissions/*` und `logs/*`
+
+### Behoben
+- **Modul-Blöcke im Frontend**: Blöcke von Modulen werden jetzt korrekt gerendert
+  - FormBlock wird auf Frontend-Seiten angezeigt
+  - BlockRegistry hat Zugriff auf alle registrierten Module-Blöcke
+
+## [202511081603-dev] - 2025-11-08
 
 ### Hinzugefügt
 - **Drag-and-Drop Navigation-Verwaltung**: Vollständig interaktive Navigation-Verwaltung unter `/admin/navigation`
