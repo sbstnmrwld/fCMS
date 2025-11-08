@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an fCMS werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [202511081130-dev]
+
+### Hinzugefügt
+- **High-Priority Unit-Tests**: 36 neue Tests für wichtige Core-Komponenten
+  - **ThemeManagerTest**: 11 Tests für Template-Rendering, Theme-Switching
+  - **LanguageManagerTest**: 14 Tests für Übersetzungen, Fallbacks, Caching
+  - **SettingsManagerTest**: 11 Tests für Settings-Verwaltung, Persistenz
+  - **Gesamt**: 223 Tests, 335 Assertions
+
+### Geändert
+- **Test-Coverage**: Von 187 auf 223 Tests erweitert (+19%)
+
+---
+
 ## [202511081120-dev]
 
 ### Hinzugefügt
