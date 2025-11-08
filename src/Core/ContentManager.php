@@ -56,7 +56,7 @@ class ContentManager
         // muss atomar sein, um Race Conditions zu vermeiden
         $lockFile = $this->contentPath . '/.slug-creation.lock';
         $lockHandle = fopen($lockFile, 'c');
-        
+
         if ($lockHandle === false) {
             throw new StorageException('Konnte Lock-Datei nicht erstellen');
         }
@@ -95,7 +95,7 @@ class ContentManager
 
             // Lock freigeben
             flock($lockHandle, LOCK_UN);
-            
+
             return $result;
         } finally {
             fclose($lockHandle);

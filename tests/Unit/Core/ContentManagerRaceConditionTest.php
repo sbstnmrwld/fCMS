@@ -18,17 +18,17 @@ class ContentManagerRaceConditionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->tempDir = sys_get_temp_dir() . '/fcms_race_test_' . uniqid();
         mkdir($this->tempDir . '/pages', 0755, true);
-        
+
         $this->contentManager = new ContentManager($this->tempDir);
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Cleanup
         if (is_dir($this->tempDir)) {
             $this->deleteDirectory($this->tempDir);
@@ -40,13 +40,13 @@ class ContentManagerRaceConditionTest extends TestCase
         if (!is_dir($dir)) {
             return;
         }
-        
+
         $items = scandir($dir);
         foreach ($items as $item) {
             if ($item === '.' || $item === '..') {
                 continue;
             }
-            
+
             $path = $dir . '/' . $item;
             if (is_dir($path)) {
                 $this->deleteDirectory($path);
@@ -54,7 +54,7 @@ class ContentManagerRaceConditionTest extends TestCase
                 unlink($path);
             }
         }
-        
+
         rmdir($dir);
     }
 
@@ -78,7 +78,7 @@ class ContentManagerRaceConditionTest extends TestCase
         // Simuliere gleichzeitige Requests durch mehrere Prozesse
         // In einem echten Szenario würden hier Fork oder parallele HTTP-Requests verwendet
         // Für den Unit-Test testen wir das Locking direkt
-        
+
         $results = [];
         $lockErrors = 0;
 
@@ -100,11 +100,11 @@ class ContentManagerRaceConditionTest extends TestCase
         // Prüfe, dass alle erstellten Seiten unterschiedliche Slugs haben
         $files = glob($this->tempDir . '/pages/*.json');
         $slugs = [];
-        
+
         foreach ($files as $file) {
             $data = json_decode(file_get_contents($file), true);
             $this->assertArrayHasKey('slug', $data);
-            
+
             // Prüfe auf Duplikate
             $this->assertNotContains($data['slug'], $slugs, 'Slug "' . $data['slug'] . '" sollte eindeutig sein');
             $slugs[] = $data['slug'];
@@ -125,18 +125,18 @@ class ContentManagerRaceConditionTest extends TestCase
     public function testFileLocksPreventSimultaneousAccess(): void
     {
         $lockFile = $this->tempDir . '/pages/.slug-creation.lock';
-        
+
         // Erste Lock erwerben
         $handle1 = fopen($lockFile, 'c');
         $this->assertNotFalse($handle1);
-        
+
         $locked1 = flock($handle1, LOCK_EX | LOCK_NB); // Non-blocking
         $this->assertTrue($locked1, 'Erste Lock sollte erfolgreich sein');
 
         // Zweite Lock versuchen (sollte fehlschlagen, da bereits gelockt)
         $handle2 = fopen($lockFile, 'c');
         $this->assertNotFalse($handle2);
-        
+
         $locked2 = flock($handle2, LOCK_EX | LOCK_NB); // Non-blocking
         $this->assertFalse($locked2, 'Zweite Lock sollte fehlschlagen während erste aktiv ist');
 
@@ -147,7 +147,7 @@ class ContentManagerRaceConditionTest extends TestCase
         // Jetzt sollte zweite Lock erfolgreich sein
         $locked2Retry = flock($handle2, LOCK_EX | LOCK_NB);
         $this->assertTrue($locked2Retry, 'Lock sollte nach Freigabe verfügbar sein');
-        
+
         flock($handle2, LOCK_UN);
         fclose($handle2);
     }
@@ -170,7 +170,7 @@ class ContentManagerRaceConditionTest extends TestCase
         ];
 
         $lockFile = $this->tempDir . '/pages/.slug-creation.lock';
-        
+
         // Lock-Datei sollte vor createPage nicht existieren
         if (file_exists($lockFile)) {
             unlink($lockFile);
@@ -182,7 +182,7 @@ class ContentManagerRaceConditionTest extends TestCase
 
         // Lock-Datei sollte existieren (wird nicht gelöscht, nur freigegeben)
         $this->assertFileExists($lockFile, 'Lock-Datei sollte nach createPage existieren');
-        
+
         // Prüfe, dass Lock-Datei nicht mehr gelockt ist
         $handle = fopen($lockFile, 'c');
         $locked = flock($handle, LOCK_EX | LOCK_NB);

@@ -22,11 +22,11 @@ Implementierung von **File-Locking** im `ContentManager::createPage()`:
 public function createPage(array $data): bool
 {
     // ... Validierung ...
-    
+
     // Kritischer Abschnitt: Slug-Eindeutigkeit + Datei-Erstellung
     $lockFile = $this->contentPath . '/.slug-creation.lock';
     $lockHandle = fopen($lockFile, 'c');
-    
+
     try {
         // Exklusives Lock erwerben
         if (!flock($lockHandle, LOCK_EX)) {
@@ -35,16 +35,16 @@ public function createPage(array $data): bool
 
         // Slug-Eindeutigkeit prüfen (jetzt thread-safe)
         $slug = $this->ensureUniqueSlug($slug);
-        
+
         // Seite erstellen
         $page = [...];
-        
+
         // Seite speichern (noch unter Lock)
         $result = $this->savePage($slug, $page);
-        
+
         // Lock freigeben
         flock($lockHandle, LOCK_UN);
-        
+
         return $result;
     } finally {
         fclose($lockHandle);
@@ -103,7 +103,7 @@ OK (3 tests, 31 assertions)
 - Prüft Slug-Eindeutigkeit bei 5 gleichzeitigen Requests
 - Testet schnelle sequentielle Erstellungen
 
-**Hinweis**: Integration-Tests erfordern CSRF-Tokens und Admin-Session. 
+**Hinweis**: Integration-Tests erfordern CSRF-Tokens und Admin-Session.
 Können mit `@group integration` markiert und separat ausgeführt werden.
 
 ## Performance

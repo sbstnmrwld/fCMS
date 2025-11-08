@@ -40,7 +40,7 @@ fCMS implementiert verschiedene Sicherheitsmaßnahmen zum Schutz vor gängigen A
 Gleichzeitige Page-Erstellungen können Duplikate erzeugen:
 ```
 Thread A: prüft "test-page" → existiert nicht
-Thread B: prüft "test-page" → existiert nicht  
+Thread B: prüft "test-page" → existiert nicht
 Thread A: erstellt "test-page.json"
 Thread B: erstellt "test-page.json" → ÜBERSCHREIBT A!
 ```
@@ -54,10 +54,10 @@ $lockHandle = fopen($lockFile, 'c');
 
 try {
     flock($lockHandle, LOCK_EX); // Exklusives Lock
-    
+
     $slug = $this->ensureUniqueSlug($slug); // Thread-safe
     $this->savePage($slug, $page);          // Thread-safe
-    
+
     flock($lockHandle, LOCK_UN);
 } finally {
     fclose($lockHandle);
@@ -70,7 +70,7 @@ try {
 - ✅ Standard PHP-Locking (keine Dependencies)
 - ✅ Minimaler Performance-Overhead (~1-2ms)
 
-**Tests:** 
+**Tests:**
 - `tests/Unit/Core/ContentManagerRaceConditionTest.php` (3 Tests)
 - `scripts/test-race-condition.php` (Manueller Fork-Test)
 

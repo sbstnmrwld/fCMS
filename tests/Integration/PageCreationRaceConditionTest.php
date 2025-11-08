@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Integration-Test für Race Conditions bei gleichzeitigen Page-Erstellungen
- * 
+ *
  * Dieser Test simuliert echte parallele HTTP-Requests und prüft,
  * dass keine Slug-Duplikate entstehen.
  */
@@ -16,11 +16,11 @@ class PageCreationRaceConditionTest extends TestCase
 {
     private const BASE_URL = 'http://localhost:8000';
     private string $authCookie = '';
-    
+
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Prüfe ob Server läuft
         $ch = curl_init(self::BASE_URL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -28,14 +28,14 @@ class PageCreationRaceConditionTest extends TestCase
         $result = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode === 0) {
             $this->markTestSkipped('Server nicht erreichbar auf ' . self::BASE_URL);
         }
-        
+
         // Authentifiziere für Admin-Zugriff
         $this->authCookie = $this->login();
-        
+
         if (empty($this->authCookie)) {
             $this->markTestSkipped('Konnte nicht authentifizieren - Login fehlgeschlagen');
         }
@@ -44,7 +44,7 @@ class PageCreationRaceConditionTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Cleanup: Lösche alle Test-Seiten
         $this->cleanupTestPages();
     }
@@ -56,7 +56,7 @@ class PageCreationRaceConditionTest extends TestCase
     {
         $timestamp = time();
         $title = "Race Condition Test {$timestamp}";
-        
+
         // Erstelle mehrere parallele Requests
         $multiHandle = curl_multi_init();
         $handles = [];
@@ -84,7 +84,7 @@ class PageCreationRaceConditionTest extends TestCase
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => false,
             ]);
-            
+
             curl_multi_add_handle($multiHandle, $ch);
             $handles[] = $ch;
         }
@@ -103,21 +103,21 @@ class PageCreationRaceConditionTest extends TestCase
         foreach ($handles as $ch) {
             $response = curl_multi_getcontent($ch);
             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
+
             // 302/303 = Erfolgreicher Redirect nach Page-Erstellung
             if ($statusCode === 302 || $statusCode === 303) {
                 $successCount++;
             }
-            
+
             curl_multi_remove_handle($multiHandle, $ch);
             curl_close($ch);
         }
-        
+
         curl_multi_close($multiHandle);
-        
+
         // Warte kurz, damit alle Dateien geschrieben sind
         usleep(100000); // 100ms
-        
+
         // Lade alle erstellten Test-Seiten und prüfe ihre Slugs
         $slugs = $this->getTestPageSlugs($title);
 
@@ -125,7 +125,7 @@ class PageCreationRaceConditionTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $successCount, 'Mindestens eine Page sollte erfolgreich erstellt werden');
         $this->assertEquals($numRequests, $successCount, 'Alle Requests sollten erfolgreich sein');
         $this->assertCount($numRequests, $slugs, 'Alle Seiten sollten in der Datenbank sein');
-        
+
         // Wichtigster Test: Alle Slugs müssen eindeutig sein
         $uniqueSlugs = array_unique($slugs);
         $this->assertCount(
@@ -138,7 +138,7 @@ class PageCreationRaceConditionTest extends TestCase
         sort($slugs);
         $expectedSlug = $this->slugify($title);
         $this->assertEquals($expectedSlug, $slugs[0], 'Erster Slug sollte ohne Nummer sein');
-        
+
         for ($i = 1; $i < count($slugs); $i++) {
             $this->assertEquals(
                 $expectedSlug . '-' . $i,
@@ -173,7 +173,7 @@ class PageCreationRaceConditionTest extends TestCase
 
             $this->assertArrayHasKey('slug', $response);
             $slugs[] = $response['slug'];
-            
+
             // Sehr kurze Pause (simuliert schnelle Klicks)
             usleep(10000); // 10ms
         }
@@ -247,21 +247,21 @@ class PageCreationRaceConditionTest extends TestCase
     private function getTestPageSlugs(string $titlePrefix): array
     {
         $contentPath = __DIR__ . '/../../content/pages';
-        
+
         if (!is_dir($contentPath)) {
             return [];
         }
-        
+
         $slugs = [];
         $files = glob($contentPath . '/*.json');
-        
+
         foreach ($files as $file) {
             $data = json_decode(file_get_contents($file), true);
             if (isset($data['title']) && str_starts_with($data['title'], $titlePrefix)) {
                 $slugs[] = $data['slug'];
             }
         }
-        
+
         sort($slugs);
         return $slugs;
     }
@@ -286,17 +286,17 @@ class PageCreationRaceConditionTest extends TestCase
     private function cleanupTestPages(): void
     {
         $contentPath = __DIR__ . '/../../content/pages';
-        
+
         if (!is_dir($contentPath)) {
             return;
         }
-        
+
         $files = glob($contentPath . '/*.json');
-        
+
         foreach ($files as $file) {
             $data = json_decode(file_get_contents($file), true);
-            if (isset($data['title']) && 
-                (str_contains($data['title'], 'Race Condition Test') || 
+            if (isset($data['title']) &&
+                (str_contains($data['title'], 'Race Condition Test') ||
                  str_contains($data['title'], 'Rapid Test'))) {
                 @unlink($file);
             }
